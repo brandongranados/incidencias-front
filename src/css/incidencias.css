@@ -1,0 +1,71 @@
+.listaDocsPdf {
+    height: 83vh;
+    overflow: scroll;
+}
+.caja-incidencias{
+    margin-left: 0.7%;
+}
+.posicion-navar-search {
+    width: 50%;
+}
+.posicion-navar-fechas {
+    width: 50%;
+    display: flex;
+    flex-direction: row-reverse;
+    padding-right: 1%;
+}
+.campos-fechas{
+    margin-left: 1%;
+}
+.paginacion{
+    padding-top: 0.3%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.056);
+}
+
+/*
+    RESET DE ESTILOS MATERIAL UI
+*/
+
+/* ESTILOS DE CAMPOS DE FECHAS */
+
+.css-o9k5xi-MuiInputBase-root-MuiOutlinedInput-root, 
+.css-1jy569b-MuiFormLabel-root-MuiInputLabel-root, 
+.css-14s5rfu-MuiFormLabel-root-MuiInputLabel-root, 
+.css-1yq5fb3-MuiButtonBase-root-MuiIconButton-root,
+.css-1d3z3hw-MuiOutlinedInput-notchedOutline {
+    font-weight: bold;
+    color: black!important;
+    border-color: black!important;
+}
+
+.css-1d3z3hw-MuiOutlinedInput-notchedOutline {
+    border-width: 0.15em!important;
+}
+
+.css-o9k5xi-MuiInputBase-root-MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: black!important;
+}
+
+.css-4jnixx-MuiStack-root > .MuiTextField-root {
+    min-width: none;
+    width: 17px;
+}
+.MuiToolbar-gutters {
+    padding: 0%!important;
+}
+.css-nxo287-MuiInputBase-input-MuiOutlinedInput-input {
+    font-size: 1.2em!important;
+}
+.contendorVisPdf {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.documentoPdf {
+    max-width: 80%;
+    width: 80%;
+}

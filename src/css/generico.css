@@ -1,0 +1,15 @@
+.fade-in-out {
+  animation: fadeInOut 5.2s linear; /* 1 segundo de entrada + 3 segundos estáticos + 1 segundo de salida */
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0; /* Comienza completamente transparente */
+  }
+  10%, 85% {
+    opacity: 1; /* Se mantiene completamente opaco durante los siguientes 3 segundos */
+  }
+  100% {
+    opacity: 0; /* Termina completamente transparente */
+  }
+}

@@ -1,0 +1,28 @@
+.pdfPaquete {
+    padding-top: 0.8%;
+    padding-left: 0.3%;
+    padding-right: 0.3%;
+}
+.imgPdf{
+    transition: transform 0.3s ease-in-out;
+    font-size: 7em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+.imgPdf:hover {
+    transform: scale(1.1);
+}
+.imgPdf > i:hover {
+    cursor: pointer;
+}
+.datos-pdf{
+    overflow: scroll;
+    max-height: 30vh;
+}
+.tituloPDF {
+    text-align: center;
+    padding-top: 1%;
+}

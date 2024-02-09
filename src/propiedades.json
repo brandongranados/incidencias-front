@@ -1,0 +1,8 @@
+{
+    "URL_SERVER": "http://localhost:9090",
+    "LOGIN": "/login",
+    "REPOSICION": "/reposicion",
+    "CORRIMIENTO": "/corrimiento",
+    "DIAECONOMICO": "/diaEconomico",
+    "DATOS_LOGIN": "/sesionUsuario"
+}

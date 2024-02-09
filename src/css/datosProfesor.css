@@ -1,0 +1,49 @@
+.cardFondos{
+    background-color: rgba(255, 255, 255, 0.679)!important;
+    margin-left: 1%;
+    margin-top: 1%;
+    margin-right: 0.5%;
+    border-style: solid;
+    border-color: black;
+}
+.masivaFlex{
+    display: flex;
+    justify-content: center;
+}
+.elemetsFormulario{
+    width: 100%;
+    margin-top: 1%!important;
+}
+.relojesFormulario{
+    display: flex;
+    justify-content: center;
+}
+.botonProfIndvHijo{
+    background-color: #f0f0f0;
+}
+.botonProfIndv{
+    display: flex;
+    justify-content: center;
+}
+
+
+
+/*
+RESET ESTILOS
+*/
+
+.css-85zwa9-MuiInputBase-root-MuiFilledInput-root{
+    font-size: 1.7em!important;
+}
+.css-e4w4as-MuiFormLabel-root-MuiInputLabel-root{
+    font-size: 1.4em!important;
+}
+.css-o943dk-MuiFormLabel-root-MuiInputLabel-root{
+    font-size: 1.4em!important;
+}
+.css-1jy569b-MuiFormLabel-root-MuiInputLabel-root{
+    font-size: 1.5em!important;
+}
+.css-14s5rfu-MuiFormLabel-root-MuiInputLabel-root{
+    font-size: 1.5em!important;
+}
