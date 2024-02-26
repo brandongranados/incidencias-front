@@ -4,7 +4,7 @@ import { styled, alpha } from '@mui/material/styles';
 
 import '../css/Search.css';
 
-let Search = () => {
+let Search = ({ value, onChange }) => {
     const SearchDefinido = styled('div')(({ theme }) => ({
         position: 'relative',
         borderRadius: theme.shape.borderRadius,
@@ -55,6 +55,9 @@ let Search = () => {
             <StyledInputBase
                 placeholder="Buscar"
                 inputProps={{ 'aria-label': 'search' }}
+                value={value}
+                onChange={onChange}
+                autoFocus
             />
         </SearchDefinido>
     );

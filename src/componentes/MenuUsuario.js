@@ -21,6 +21,7 @@ import Horario from "./Horario";
 import { Simples } from "./Alertas";
 
 import '../css/menuusuario.css';
+import AgregarDatosFaltan from "./AgregarDatosFaltan";
 
 let MenuUsuario = function (){
       
@@ -83,68 +84,77 @@ let MenuUsuario = function (){
         setTarjetaCic(dat[0].tarjetaCic);
     }, [] );
 
+    let revisaDatosObligatorios = async () => {
+        try {
+            
+        } catch (error) {}
+    };
+
     return(
-        <Grid container>
-            <Grid item xs={3} 
-                sx={{height:"98vh", backgroundColor:"rgba(0, 0, 0, 0.85)"}} >
-                <Typography component={"p"} variant="h4" sx={{color:"white", textAlign:"center"}}>Departamento CIC</Typography>
-                <Typography component={"p"} variant="h5" sx={{color:"white", textAlign:"center"}}>{"Bienvenido "+nombreProfesor}</Typography>
-                <MenuList>
-                    <MenuItem onClick={ () => cambiarPagina(1) }>
-                        <div className={ estiloNavar[0] ? "navbar-usuario": "" }>
-                            <Typography component={"p"} variant="h6" sx={{color:"white", textAlign:"center"}}>
-                                Reposicion de horas
-                            </Typography>
-                        </div>
-                    </MenuItem>
-                    <MenuItem onClick={ () => cambiarPagina(2) }>
-                        <div className={ estiloNavar[1] ? "navbar-usuario": "" }>
-                            <Typography component={"p"} variant="h6" sx={{color:"white", textAlign:"center"}}>
-                                Corrimiento de horario
-                            </Typography>
-                        </div>
-                    </MenuItem>
-                    <MenuItem onClick={ () => cambiarPagina(3) }>
-                        <div className={ estiloNavar[2] ? "navbar-usuario": "" }>
-                            <Typography component={"p"} variant="h6" sx={{color:"white", textAlign:"center"}}>
-                                Dia economico
-                            </Typography>
-                        </div>
-                    </MenuItem>
-                    <MenuItem onClick={ () => cambiarPagina(4) }>
-                        <div className={ estiloNavar[3] ? "navbar-usuario": "" }>
-                            <Typography component={"p"} variant="h6" sx={{color:"white", textAlign:"center"}}>
-                                Ver horario.
-                            </Typography>
-                        </div>
-                    </MenuItem>
-                </MenuList>
-                <Logout/>
-            </Grid>
-            <Grid item xs={9} sx={{maxHeight:"98vh", overflow:"scroll"}}>
-                <Simples obj={alertaSimple} />
-                <Card sx={estilosCard}>
-                    <Typography component={"p"} variant='h4' sx={{textAlign:"center"}}>
-                        Datos profesor
-                    </Typography>
-                    <CardContent>
-                        <Grid container>
-                            <Grid item xs={12}>
-                                <TextField
-                                    sx={EstiloTimePicker}
-                                    multiline
-                                    variant="filled"
-                                    label="Numero de tarjeta cic"
-                                    placeholder="Numero de tarjeta cic"
-                                    value={tarjetaCic}
-                                    />
+        <>
+            <AgregarDatosFaltan />
+            <Grid container>
+                <Grid item xs={3} 
+                    sx={{height:"98vh", backgroundColor:"rgba(0, 0, 0, 0.85)"}} >
+                    <Typography component={"p"} variant="h4" sx={{color:"white", textAlign:"center"}}>Departamento CIC</Typography>
+                    <Typography component={"p"} variant="h5" sx={{color:"white", textAlign:"center"}}>{"Bienvenido "+nombreProfesor}</Typography>
+                    <MenuList>
+                        <MenuItem onClick={ () => cambiarPagina(1) }>
+                            <div className={ estiloNavar[0] ? "navbar-usuario": "" }>
+                                <Typography component={"p"} variant="h6" sx={{color:"white", textAlign:"center"}}>
+                                    Reposicion de horas
+                                </Typography>
+                            </div>
+                        </MenuItem>
+                        <MenuItem onClick={ () => cambiarPagina(2) }>
+                            <div className={ estiloNavar[1] ? "navbar-usuario": "" }>
+                                <Typography component={"p"} variant="h6" sx={{color:"white", textAlign:"center"}}>
+                                    Corrimiento de horario
+                                </Typography>
+                            </div>
+                        </MenuItem>
+                        <MenuItem onClick={ () => cambiarPagina(3) }>
+                            <div className={ estiloNavar[2] ? "navbar-usuario": "" }>
+                                <Typography component={"p"} variant="h6" sx={{color:"white", textAlign:"center"}}>
+                                    Dia economico
+                                </Typography>
+                            </div>
+                        </MenuItem>
+                        <MenuItem onClick={ () => cambiarPagina(4) }>
+                            <div className={ estiloNavar[3] ? "navbar-usuario": "" }>
+                                <Typography component={"p"} variant="h6" sx={{color:"white", textAlign:"center"}}>
+                                    Ver horario.
+                                </Typography>
+                            </div>
+                        </MenuItem>
+                    </MenuList>
+                    <Logout/>
+                </Grid>
+                <Grid item xs={9} sx={{maxHeight:"98vh", overflow:"scroll"}}>
+                    <Simples obj={alertaSimple} />
+                    <Card sx={estilosCard}>
+                        <Typography component={"p"} variant='h4' sx={{textAlign:"center"}}>
+                            Datos profesor
+                        </Typography>
+                        <CardContent>
+                            <Grid container>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        sx={EstiloTimePicker}
+                                        multiline
+                                        variant="filled"
+                                        label="Numero de tarjeta cic"
+                                        placeholder="Numero de tarjeta cic"
+                                        value={tarjetaCic}
+                                        />
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    </CardContent>
-                </Card>
-                {   tipoInc   }
+                        </CardContent>
+                    </Card>
+                    {   tipoInc   }
+                </Grid>
             </Grid>
-        </Grid>
+        </>
     );
 };
 

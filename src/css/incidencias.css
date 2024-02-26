@@ -2,21 +2,7 @@
     height: 83vh;
     overflow: scroll;
 }
-.caja-incidencias{
-    margin-left: 0.7%;
-}
-.posicion-navar-search {
-    width: 50%;
-}
-.posicion-navar-fechas {
-    width: 50%;
-    display: flex;
-    flex-direction: row-reverse;
-    padding-right: 1%;
-}
-.campos-fechas{
-    margin-left: 1%;
-}
+
 .paginacion{
     padding-top: 0.3%;
     display: flex;
@@ -49,13 +35,6 @@
     border-color: black!important;
 }
 
-.css-4jnixx-MuiStack-root > .MuiTextField-root {
-    min-width: none;
-    width: 17px;
-}
-.MuiToolbar-gutters {
-    padding: 0%!important;
-}
 .css-nxo287-MuiInputBase-input-MuiOutlinedInput-input {
     font-size: 1.2em!important;
 }

@@ -1,13 +1,17 @@
 import { useEffect } from "react";
 import { Provider, useDispatch } from "react-redux";
 
-import { revisaAcceso } from "./reducerAutenticacion/AutenticacionSlice";
-import { Store } from './reducerAutenticacion/Store';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import MenuAdministrador from './MenuAdministrador';
-import MenuUsuario from './MenuUsuario';
+import { revisaAcceso } from "./reducerAutenticacion/AutenticacionSlice";
+import { Store } from './reducerAutenticacion/Store';
+
 import Login from './Login';
+import Parametros from "./Parametros";
+import IncidenciasEconomico from "./IncidenciasEconomico";
+import DatosProfesor from "./DatosProfesor";
+import Inciencias from "./Incidencias";
+import MenuUsuario from "./MenuUsuario";
 
 let Inicio = () => {
     const despacha = useDispatch();
@@ -19,13 +23,11 @@ let Inicio = () => {
     return(
         <Routes>
             <Route path="/" element={<Login />} />
-
-            <Route path="/menu-administrador" element={<MenuAdministrador pag={1} />} />
-            <Route path="/menu-administrador/cargaDatProf" element={<MenuAdministrador pag={1} />} />
-            <Route path="/menu-administrador/inciencias" element={<MenuAdministrador pag={2} />} />
-            <Route path="/menu-administrador/parametros" element={<MenuAdministrador pag={0} />}/>
-
-            <Route path="/menu-usuario" element={<MenuUsuario />} />
+            <Route path="/menu-administrador/cargaDatProf" element={<DatosProfesor/>} />
+            <Route path="/menu-administrador/inciencias" element={<Inciencias />} />
+            <Route path="/menu-administrador/parametros" element={<Parametros />}/>
+            <Route path="/menu-administrador/incidenciasEconomicos" element={<IncidenciasEconomico />}/>
+            <Route path="/menu-usuario" element={<MenuUsuario />}/>
         </Routes>
     )
 };

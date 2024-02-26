@@ -61,7 +61,7 @@ let Login = function ()
             else if (roles[0].role === "ROLE_ADMIN")
             {
                 despacha(conAcceso({ val: "1" , token: datos.token }));
-                url("/menu-administrador");
+                url("/menu-administrador/cargaDatProf");
             }
             else if (roles[0].role.length > 0)
             {

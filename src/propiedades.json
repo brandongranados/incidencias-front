@@ -4,5 +4,13 @@
     "REPOSICION": "/reposicion",
     "CORRIMIENTO": "/corrimiento",
     "DIAECONOMICO": "/diaEconomico",
-    "DATOS_LOGIN": "/sesionUsuario"
+    "DATOS_LOGIN": "/sesionUsuario",
+    "EXCEL_PROF":"/excelProf",
+    "DATOS_OBLIGATORIOS": "/getObligatorios",
+    "ASIGNAR_OBLIGATORIOS": "/setObligatorios",
+    "VISULIZAR_MEMOS_INC": "/getMemosInc",
+    "VISULIZAR_MEMOS_ECO": "/getMemosEco",
+    "CAMBIAR_CONTADOR": "/setContador",
+    "GET_PARAMETROS": "/getParametros",
+    "SET_QUINCENA": "/setQuincena"
 }
