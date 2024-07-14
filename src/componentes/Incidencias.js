@@ -6,20 +6,13 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import dayjs from 'dayjs';
+import 'dayjs/locale/en-gb';
+
 import AppBar from "@material-ui/core/AppBar";
 import Grid from "@material-ui/core/Grid";
 import Toolbar from "@material-ui/core/Toolbar";
 import Pagination from '@mui/material/Pagination';
 import Box from "@mui/material/Box";
-import { Typography } from '@material-ui/core';
-
-
-import { Simples } from "./Alertas";
-import Logout from "./Logout";
-import { MenuList } from "@material-ui/core";
-import { NavLink } from "react-router-dom";
-import { MenuItem } from '@material-ui/core';
-import '../css/sidebar.css';
 
 import DocPdf from "./DocPdf";
 import Search from "./Search";
@@ -27,8 +20,7 @@ import ajax from "../ConfigAxios";
 import urlAjax from '../propiedades.json';
 import Cargando from './Cargando';
 import { Alertas } from "./Alertas";
-
-import '../css/incidencias.css';
+import NavarAdmin from './NavarAdmin';
 
 let Inciencias = function(){
     
@@ -38,10 +30,6 @@ let Inciencias = function(){
                     activa: false,
                     icono: 0
                 });
-    
-    let cambiarMsm = (obj) => {
-        setAlertaSimple(obj);
-    };
 
     let crearCadenaFecha = (obj) => {
         let ano = (obj.getFullYear())+"";
@@ -55,22 +43,17 @@ let Inciencias = function(){
     };
 
     //ESTILOS
-    const navar = {
+    const barraja = {
         backgroundColor: "#1976d2c6",
         height:"10vh"
     };
-    const estilosFechas = {
-        border:"1.5rem solid black"
-    };
-
-    //CREAR COMPONENTE DE ALERTAS
-    const alertasComponent = Alertas();
 
     //FILTROS de incidencias
-    const [busqueda, setBusqueda] = useState("");
-    const [fechaIncidencia, setFechaIncidencia] = useState("");
-    const [fechaRegistro, setFechaRegistro] = useState("");
-    const [paginacion, setPaginacion] = useState(1);
+    const [busqueda, setBusqueda] = useState(null);
+    const [fechaIni, setFechaIni] = useState(null);
+    const [fechaFin, setFechaFin] = useState(null);
+    const [cantPaginas, setCantPaginas] = useState(1);
+    const [paginaActual, setPaginaActual] = useState(1);
 
     //VARIABLE MENAJO DE MODAL CARGANDO
     const [espera, setEspera] =useState(false);
@@ -90,8 +73,20 @@ let Inciencias = function(){
                   }});
 
             let datosResp = await pet.data;
-            
-            setPdf(datosResp);
+
+            if( datosResp.cant > 10 )
+            {
+                let temp = parseInt(datosResp.cant)%10 > 0 ? parseInt(parseInt(datosResp.cant)/10) + 1 : parseInt(datosResp.cant)/10;
+                setCantPaginas(temp);
+                setPaginaActual(obj.paginacion);
+            }
+            else
+            {
+                setCantPaginas(1);
+                setPaginaActual(1);
+            }
+
+            setPdf(datosResp.lista);
             setEspera(false);
 
         } catch (error) {
@@ -99,9 +94,65 @@ let Inciencias = function(){
         }
     };
 
-    let cambiarBusqueda = (e) => setBusqueda(e.target.value);
-    let cambiarFechaIncidencia = (e) => setFechaIncidencia(crearCadenaFecha(e["$d"]));
-    let cambiarFechaRegistro = (e) => setFechaRegistro(crearCadenaFecha(e["$d"]));
+    let cambiaPaginacion = async (e, valor) => {
+
+        if( valor == paginaActual )
+            return;
+
+        setPaginaActual(valor);
+
+        let datos = {    
+            fechaIni: fechaIni, 
+            fechaFin: fechaFin, 
+            busqueda: busqueda,
+            paginacion: valor   };
+
+        await ejecutarAjax(datos);
+    };
+
+    let cambiarBusqueda = async (e) => {
+        setBusqueda(e.target.value);
+
+        let datos = {    
+            fechaIni: fechaIni, 
+            fechaFin: fechaFin, 
+            busqueda: e.target.value,
+            paginacion: paginaActual };
+
+        await ejecutarAjax(datos);
+    };
+
+    let cambiarFechaIni = async (e) => {
+
+        setFechaIni(crearCadenaFecha(e["$d"]));
+
+        if( fechaFin == null  )
+            return;
+
+        let datos = {    
+            fechaIni: crearCadenaFecha(e["$d"]), 
+            fechaFin: fechaFin, 
+            busqueda: busqueda,
+            paginacion: paginaActual };
+
+        await ejecutarAjax(datos);
+    };
+    
+    let cambiarFechaFin = async (e) => {
+
+        setFechaFin(crearCadenaFecha(e["$d"]));
+
+        if( fechaIni == null  )
+            return;
+
+        let datos = {    
+            fechaIni: fechaIni, 
+            fechaFin: crearCadenaFecha(e["$d"]), 
+            busqueda: busqueda,
+            paginacion: paginaActual };
+
+        await ejecutarAjax(datos);
+    };
 
     useEffect( () => {
         let datos = {    
@@ -110,64 +161,20 @@ let Inciencias = function(){
             busqueda: null,
             paginacion: 1   };
 
-        setTimeout(async () => {
-            await ejecutarAjax(datos);
-        }, 0);
+        setTimeout( async () => { await ejecutarAjax(datos) }, 0 );
     }, [] );
 
     return(
+
         <Grid container >
-            <Grid item xs={3}>
-                <div style={{height:"98vh", backgroundColor:"rgba(0, 0, 0, 0.85)"}}>
-                    <MenuList>
-                        <MenuItem >
-                            <NavLink 
-                                className={"link"}
-                                aria-current={"Carga datos de profesor"}
-                                to={"/menu-administrador/cargaDatProf"} >
-                                    <Typography component="span" variant="h5" textAlign={"right"} >
-                                        Carga datos de profesor
-                                    </Typography>
-                            </NavLink>
-                        </MenuItem>
-                        <MenuItem >
-                            <NavLink 
-                                className={"sidebar"} 
-                                aria-current={"Carga datos de profesor"}
-                                to={"/menu-administrador/inciencias"} >
-                                    <Typography component="span" variant="h5" textAlign={"right"} >
-                                        Inciencias
-                                    </Typography>
-                            </NavLink>
-                        </MenuItem>
-                        <MenuItem >
-                            <NavLink
-                                className={"link"} 
-                                aria-current={"Parametros"}
-                                to={"/menu-administrador/parametros"} >
-                                    <Typography component="span" variant="h5" textAlign={"right"} >
-                                        Parametros
-                                    </Typography>
-                            </NavLink>
-                        </MenuItem>
-                        <MenuItem >
-                            <NavLink
-                                className={"link"} 
-                                aria-current={"Dias Economicos"}
-                                to={"/menu-administrador/incidenciasEconomicos"} >
-                                    <Typography component="span" variant="h5" textAlign={"right"} >
-                                        Dias Economicos
-                                    </Typography>
-                            </NavLink>
-                        </MenuItem>
-                    </MenuList>
-                    <Logout/>
-                </div>
+            <Grid item xs={3} >
+                <Box sx={{height:"98vh", backgroundColor:"rgba(0, 0, 0, 0.85)"}} >
+                    <NavarAdmin nav={6} />
+                </Box>
             </Grid>
             <Grid item xs={9} >
-                <Simples obj={alertaSimple} />
                 <Cargando bool={espera} />
-                <AppBar componenGrt={"nav"} position="static" style={navar}>
+                <AppBar position="static" style={barraja}>
                     <Toolbar>
                         <Box sx={{width:"50%", paddingRight:"1%"}}>
                             <Search value={busqueda} 
@@ -177,21 +184,20 @@ let Inciencias = function(){
                             <Box sx={{width:"50%", paddingRight:"1%"}}>
                                 <LocalizationProvider dateAdapter={AdapterDayjs} >
                                     <DemoContainer components={['DatePicker']} >
-                                        <DatePicker label="Fecha incidencia"
-                                            onChange={ (e) => { cambiarFechaIncidencia(e) } }
-                                            value={fechaIncidencia} />
+                                        <DatePicker label="Fecha inicio"
+                                            onChange={ (e) => { cambiarFechaIni(e) } }
+                                            value={dayjs(fechaIni)}
+                                            inputProps={{ readOnly: true }} />
                                     </DemoContainer>
                                 </LocalizationProvider>
                             </Box>
                             <Box sx={{width:"50%", paddingLeft:"1%"}}>
                                 <LocalizationProvider dateAdapter={AdapterDayjs} >
                                     <DemoContainer components={['DatePicker']}>
-                                        <DatePicker label="Fecha registro"
-                                        onChange={ (e) => { cambiarFechaRegistro(e) } }
-                                        value={fechaRegistro}
-                                        slotProps={{
-                                            TextField:{ estilosFechas }
-                                        }} />
+                                        <DatePicker label="Fecha fin"
+                                        onChange={ (e) => { cambiarFechaFin(e) } }
+                                        value={dayjs(fechaFin)}
+                                        />
                                     </DemoContainer>
                                 </LocalizationProvider>
                             </Box>
@@ -210,12 +216,16 @@ let Inciencias = function(){
                         </Grid>
                     </Grid>
                 </section>
-                <section className="paginacion">
-                    <Pagination
-                    count={10} 
+                <Box display={"flex"} 
+                    justifyContent={"center"}
+                    backgroundColor={"#0000001a"}>
+                    <Pagination 
+                    count={cantPaginas}
+                    page={paginaActual}
+                    onChange={ cambiaPaginacion }
                     variant="outlined" 
-                    shape="rounded" />
-                </section>
+                    shape="rounded"/>
+                </Box>
             </Grid>
         </Grid>
     );

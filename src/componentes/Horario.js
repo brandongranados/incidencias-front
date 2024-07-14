@@ -1,8 +1,6 @@
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 
-import dayjs from 'dayjs';
-
 import Grid  from "@mui/material/Grid";
 import Card  from "@mui/material/Card";
 import Typography  from "@mui/material/Typography";
@@ -14,6 +12,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 
+import NavarUsuario from "./NavarUsuario";
 import '../css/horario.css';
 
 let Horario = () => {
@@ -35,8 +34,13 @@ let Horario = () => {
     }, [] );
 
     return(
+
         <Grid container>
-            <Grid item xs={12}>
+            <Grid item xs={3} 
+                sx={{height:"98vh", backgroundColor:"rgba(0, 0, 0, 0.85)"}} >
+                <NavarUsuario nav={4} />
+            </Grid>
+            <Grid item xs={9} sx={{maxHeight:"98vh", overflow:"scroll"}}>
                 <Card sx={estilosCard}>
                     <Typography component={"p"} variant='h4' sx={{textAlign:"center"}}>
                         Horario de profesor

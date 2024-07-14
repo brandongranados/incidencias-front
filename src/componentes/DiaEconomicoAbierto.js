@@ -5,20 +5,22 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Grid";
+import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import SendIcon from '@mui/icons-material/Send';
 import Button from "@mui/material/Button";
+import 'dayjs/locale/en-gb';
 
 import ajax from "../ConfigAxios";
 import urlAjax from '../propiedades.json';
 import Cargando from './Cargando';
 import { Alertas } from "./Alertas";
-import NavarUsuario from "./NavarUsuario";
 
-import { useSelector } from "react-redux";
 import { useState } from 'react';
+import NavarAdmin from './NavarAdmin';
 
-let DiaEconomico = () => {
+let DiaEconomicoAbierto = () => {
+
     const estilosCard = {
         backgroundColor: "rgba(255, 255, 255, 0.706)",
         borderStyle: "solid",
@@ -32,21 +34,17 @@ let DiaEconomico = () => {
 
         //CREAR COMPONENTE DE ALERTAS
         const alertasComponent = Alertas();
-
-        //DATOS USUARIO
-        const usuario = useSelector( state => state.usuario.nombreUsuario );
     
         //DATOS DE LA INCIDENCIA
         const [fechaIni, setFechaIni] = useState("");
         const [fechaFin, setFechaFin] = useState("");
+        const [tarjetaCic, setTarjetaCic] = useState("");
     
         //VARIABLE MENAJO DE MODAL CARGANDO
         const [espera, setEspera] =useState(false);
 
-        let deshabilitarFinesSem = (dia) => {
-            let dayOfWeek = dia["$d"].getDay();
-            return dayOfWeek === 0 || dayOfWeek === 6;
-        };
+        let cambiarTarjeta = (e) => setTarjetaCic(e.target.value);
+
         let setFechaInicio = (e) => {
             let ano = (e["$d"].getFullYear())+"";
             let mes = (e["$d"].getMonth()+1)+"";
@@ -105,8 +103,9 @@ let DiaEconomico = () => {
             }
     
             try {
-                let datos = { fechaIni: fechaIni, fechaFin: fechaFin,
-                                usuario: usuario };
+                let datos = { fechaIni: fechaIni, 
+                                fechaFin: fechaFin,
+                                tarjetaCic: tarjetaCic };
     
                 alertaModal = await alertasComponent.crearModalAlerta({
                     titulo: "Advertencia",
@@ -137,7 +136,7 @@ let DiaEconomico = () => {
                 }
                 setEspera(true);
     
-                await ajax.post(urlAjax.DIAECONOMICO, datos, 
+                await ajax.post(urlAjax.DIAECONOMICO_ABIERTA, datos, 
                     {headers: {
                         'Content-Type': 'application/json',
                         'Authorization': sessionStorage.getItem("Authorization")
@@ -169,15 +168,35 @@ let DiaEconomico = () => {
                 });
             }
         };
-    
+
     return(
         <Grid container>
             <Grid item xs={3} 
                 sx={{height:"98vh", backgroundColor:"rgba(0, 0, 0, 0.85)"}} >
-                <NavarUsuario nav={3} />
+                <NavarAdmin nav={5} />
             </Grid>
             <Grid item xs={9} sx={{maxHeight:"98vh", overflow:"scroll"}}>
                 <Cargando bool={espera} />
+                <Card sx={estilosCard}>
+                        <Typography component={"p"} variant='h4' sx={{textAlign:"center"}}>
+                            Ingrese la tarjeta cic del profesor para crear su reposici&oacute;n de horario
+                        </Typography>
+                        <CardContent>
+                            <Grid container>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        sx={EstiloTimePicker}
+                                        multiline
+                                        variant="filled"
+                                        label="Numero de tarjeta cic"
+                                        placeholder="Numero de tarjeta cic"
+                                        value={tarjetaCic}
+                                        onChange={ e  => cambiarTarjeta(e) }
+                                        />
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                </Card>
                 <Card sx={estilosCard}>
                     <CardContent>
                         <Typography component={"p"} variant='h4' sx={{textAlign:"center"}}>
@@ -185,23 +204,21 @@ let DiaEconomico = () => {
                         </Typography>
                         <Grid container>
                             <Grid item xs={6}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs} >
+                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb" >
                                     <DemoContainer components={['DatePicker', 'TimePicker']}>
                                         <DatePicker
                                         onChange={(event) => { setFechaInicio(event) }} 
                                         sx={EstiloTimePicker}
-                                        shouldDisableDate={deshabilitarFinesSem}
                                         label="Fecha inicio" />
                                     </DemoContainer>
                                 </LocalizationProvider>
                             </Grid>
                             <Grid item xs={6}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs} >
+                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb" >
                                     <DemoContainer components={['DatePicker', 'TimePicker']}>
                                         <DatePicker
                                         onChange={(event) => { setFechaFinal(event) }} 
                                         sx={EstiloTimePicker}
-                                        shouldDisableDate={deshabilitarFinesSem}
                                         label="Fecha fin" />
                                     </DemoContainer>
                                 </LocalizationProvider>
@@ -227,4 +244,4 @@ let DiaEconomico = () => {
     )
 };
 
-export default DiaEconomico;
+export default DiaEconomicoAbierto;

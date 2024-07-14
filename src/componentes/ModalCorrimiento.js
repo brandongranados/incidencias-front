@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -18,11 +18,10 @@ import ajax from "../ConfigAxios";
 import urlAjax from '../propiedades.json';
 import Cargando from './Cargando';
 import { Alertas } from "./Alertas";
-import NavarUsuario from "./NavarUsuario";
 
-import { useSelector } from "react-redux";
+import dayjs from 'dayjs';
 
-let Corrimiento = () => {
+let ModalCorrimiento = ({datos, cerrarModal}) => {
     const estilosCard = {
         backgroundColor: "rgba(255, 255, 255, 0.706)",
         borderStyle: "solid",
@@ -37,21 +36,13 @@ let Corrimiento = () => {
     //CREAR COMPONENTE DE ALERTAS
     const alertasComponent = Alertas();
 
-    //DATOS USUARIO
-    const usuario = useSelector( state => state.usuario.nombreUsuario );
-
     //DATOS DE LA INCIDENCIA
     const [fechaInc, setFechaInc] = useState("");
     const [horaChecIni, setHoraChecIni] = useState("");
     const [horaChecFin, setHoraChecFin] = useState("");
-
     //VARIABLE MENAJO DE MODAL CARGANDO
     const [espera, setEspera] =useState(false);
-
-    let deshabilitarFinesSem = (dia) => {
-        let dayOfWeek = dia["$d"].getDay();
-        return dayOfWeek === 0 || dayOfWeek === 6;
-    };
+    
     let setFecha = (e) => {
         let ano = (e["$d"].getFullYear())+"";
         let mes = (e["$d"].getMonth()+1)+"";
@@ -87,55 +78,21 @@ let Corrimiento = () => {
         setHoraChecFin(hora+":"+min+":"+seg);
     };
 
-    let validacion = () => {
-        let bool = true;
-
-        try{
-
-            if( fechaInc.length == 0 )
-                bool = false;
-            if( horaChecIni.length == 0 )
-                bool = false;
-            if( horaChecFin.length == 0 )
-                bool = false;
-
-        }catch(error){
-            bool = false;
-        }
-
-        return bool;
-
-    };
-
     let peticion = async (e) => {
+
         let alertaModal = null;
 
-        if( !validacion() )
-        {
-            e.preventDefault();
-            await alertasComponent.crearModalAlerta({
-                titulo: "Informativo",
-                leyenda: "Revisar que todos los campos se encuentren llenos.",
-                icono: 3,
-                activaCancelacion: false,
-                TextoConfirmacion: "Ok",
-                textoCancelacion: "Cancelar",
-                colorCancelar: "#d32f2f",
-                activa: true,
-                colorConfirmar: "#2e7d32"
-            });
-            return;
-        }
-
         try {
-            let datos = { fechInc: fechaInc, horIniInc: horaChecIni,
+            let dat = { fechInc: fechaInc,
+                            horIniInc: horaChecIni,
                             horFinInc: horaChecFin,
-                            usuario: usuario };
+                            idIncidencia: datos.id_prof_incidencia,
+                            tipo: 1 };
 
             alertaModal = await alertasComponent.crearModalAlerta({
                 titulo: "Advertencia",
                 leyenda: "¿Está seguro de enviar la incidencia?",
-                icono: 5,
+                icono: 4,
                 activaCancelacion: true,
                 TextoConfirmacion: "Enviar",
                 textoCancelacion: "Cancelar",
@@ -143,6 +100,7 @@ let Corrimiento = () => {
                 activa: true,
                 colorConfirmar: "#2e7d32"
             });
+
             if( !alertaModal )
             {
                 e.preventDefault();
@@ -152,38 +110,29 @@ let Corrimiento = () => {
                     icono: 4,
                     activaCancelacion: false,
                     TextoConfirmacion: "Ok",
-                    textoCancelacion: "Cancelar",
-                    colorCancelar: "#d32f2f",
+                    textoCancelacion: "",
+                    colorCancelar: "",
                     activa: true,
                     colorConfirmar: "#2e7d32"
                 });
+                cerrarModal();
                 return;
             }
+
             setEspera(true);
 
-            await ajax.post(urlAjax.CORRIMIENTO, datos, 
+            await ajax.post(urlAjax.CORRIMIENTO_ABIERTA_ACTUALIZA, dat, 
                 {headers: {
                     'Content-Type': 'application/json',
                     'Authorization': sessionStorage.getItem("Authorization")
                   }});
+
             setEspera(false);
+            
             await alertasComponent.crearModalAlerta({
                 titulo: "Ok",
-                leyenda: "La incidencia fue enviada. Se encuentra en espera de autorización. Se le enviará correo electrónico con el estatus de su incidencia.",
+                leyenda: "Incidencia actualizada.",
                 icono: 1,
-                activaCancelacion: false,
-                TextoConfirmacion: "Ok",
-                textoCancelacion: "",
-                colorCancelar: "",
-                activa: true,
-                colorConfirmar: "#2e7d32"
-            });
-        } catch (e) {
-            setEspera(false);
-            await alertasComponent.crearModalAlerta({
-                titulo: "Error",
-                leyenda: e.response.data,
-                icono: 2,
                 activaCancelacion: false,
                 TextoConfirmacion: "Cerrar",
                 textoCancelacion: "",
@@ -191,31 +140,49 @@ let Corrimiento = () => {
                 activa: true,
                 colorConfirmar: "#d32f2f"
             });
+
+            window.location.reload();
+        } catch (e) {
+            setEspera(false);
+            cerrarModal();
+            await alertasComponent.crearModalAlerta({
+                titulo: "Error",
+                leyenda: e.response.data,
+                icono: 2,
+                activaCancelacion: false,
+                TextoConfirmacion: "Ok",
+                textoCancelacion: "Cancelar",
+                colorCancelar: "#d32f2f",
+                activa: true,
+                colorConfirmar: "#2e7d32"
+            });
         }
     };
+
+    useEffect( () => {
+        setFechaInc(datos.fecha_incidencia);
+        setHoraChecIni(datos.hora_ini_incidencia);
+        setHoraChecFin(datos.hora_fin_incidencia);
+    }, [] );
     
     return(
-        <Grid container>
-            <Grid item xs={3} 
-                sx={{height:"98vh", backgroundColor:"rgba(0, 0, 0, 0.85)"}} >
-                <NavarUsuario nav={2} />
-            </Grid>
-            <Grid item xs={9} sx={{maxHeight:"98vh", overflow:"scroll"}}>
+        <Grid container sx={{backgroundColor:"#ffffffc9"}}>
+            <Grid item xs={12} sx={{maxHeight:"98vh", overflow:"scroll"}}>
                 <Cargando bool={espera} />
                 <Card sx={estilosCard}>
                     <CardContent>
                         <Typography component={"p"} variant='h4' sx={{textAlign:"center"}}>
-                            Datos de la incidencia
+                            Datos del corrimiento
                         </Typography>
                         <Grid container>
                             <Grid item xs={4}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb">
+                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb" >
                                     <DemoContainer components={['DatePicker', 'TimePicker']}>
                                         <DatePicker
                                         onChange={(event) => { setFecha(event) }}
                                         sx={EstiloTimePicker} 
                                         label="Fecha incidencia"
-                                        shouldDisableDate={deshabilitarFinesSem} />
+                                        value={dayjs(fechaInc)} />
                                     </DemoContainer>
                                 </LocalizationProvider>
                             </Grid>
@@ -232,6 +199,7 @@ let Corrimiento = () => {
                                             minutes: renderTimeViewClock,
                                             seconds: renderTimeViewClock,
                                             }}
+                                        value={dayjs("1970-01-01T"+horaChecIni)}
                                         />
                                     </DemoContainer>
                                 </LocalizationProvider>
@@ -249,6 +217,7 @@ let Corrimiento = () => {
                                             minutes: renderTimeViewClock,
                                             seconds: renderTimeViewClock,
                                             }}
+                                        value={dayjs("1970-01-01T"+horaChecFin)}
                                         />
                                     </DemoContainer>
                                 </LocalizationProvider>
@@ -264,7 +233,12 @@ let Corrimiento = () => {
                             color="success" 
                             startIcon={<SendIcon/>}
                             onClick={ (event) =>{ peticion(event) } }    >
-                                Enviar incidencia
+                                Actualizar incidencia
+                            </Button>
+                            <Button variant="contained"
+                            color="error"
+                            onClick={ cerrarModal }    >
+                                Cerrar
                             </Button>
                         </Grid>
                     </CardContent>
@@ -274,4 +248,4 @@ let Corrimiento = () => {
     )
 };
 
-export default Corrimiento;
+export default ModalCorrimiento;

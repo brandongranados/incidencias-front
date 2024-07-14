@@ -2,6 +2,10 @@
   animation: fadeInOut 5.2s linear; /* 1 segundo de entrada + 3 segundos estáticos + 1 segundo de salida */
 }
 
+.swal2-container.swal2-center.swal2-backdrop-show{
+  z-index: 1190000!important;
+}
+
 @keyframes fadeInOut {
   0% {
     opacity: 0; /* Comienza completamente transparente */

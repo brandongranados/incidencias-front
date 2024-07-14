@@ -23,7 +23,7 @@ let Cargando = ({bool}) => {
     return(
         <Modal
         open={abierto}
-        aria-labelledby="Titulo cargando"
+        aria-labelledby="Título cargando"
         aria-describedby="cargando" >
             <div style={{height:"100vh", width:"100%", display:"flex", alignItems:"center", justifyContent:"center"}}>
                 <CircularProgress size={iconoTam}/>

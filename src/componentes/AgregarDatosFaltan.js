@@ -7,9 +7,8 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 
-import * as crypto from "crypto-js";
+//import * as crypto from "crypto-js";
 
 import ajax from "../ConfigAxios";
 import urlAjax from '../propiedades.json';
@@ -19,9 +18,7 @@ import { Alertas } from "./Alertas";
 
 let AgregarDatosFaltan = () => {
 
-    const [obligatorio, setObligatorio] = useState(true);
-    //DATOS USUARIO
-    const usuario = useSelector( state => state.usuario.nombreUsuario );
+    const [obligatorio, setObligatorio] = useState(false);
     //VARIABLE MENAJO DE MODAL CARGANDO
     const [espera, setEspera] =useState(false);
     //CREAR COMPONENTE DE ALERTAS
@@ -30,6 +27,7 @@ let AgregarDatosFaltan = () => {
     //DATOS OBLOIGATORIOS
     const [correo, setCorreo] = useState("");
     const [contra, setContra] = useState("");
+    const [usuario, setUsuario] = useState();
 
     let cambiarCorreo = (e) => setCorreo(e.target.value);
     let cambiarContra = (e) => setContra(e.target.value.replace(" ", ""));
@@ -47,8 +45,12 @@ let AgregarDatosFaltan = () => {
         return bool;
     };
     let revisarDatos = async () => {
+
+        let user = sessionStorage.getItem("nombreUsuario");
+        setUsuario(user);
+
         try {
-            let pet = await ajax.post(urlAjax.DATOS_OBLIGATORIOS, { usuario: usuario },
+            let pet = await ajax.post(urlAjax.DATOS_OBLIGATORIOS, { usuario: user },
                 {headers: {
                     'Content-Type': 'application/json',
                     'Authorization': sessionStorage.getItem("Authorization")
@@ -61,16 +63,14 @@ let AgregarDatosFaltan = () => {
             else
                   setObligatorio(true);
                   
-        } catch (error) {
-            console.log(error);
-        }
+        } catch (error) {}
     };
     let ejecutarAjax = async (e) => {
         let datos = {usuario: usuario, correo: correo, contra: contra };
         setObligatorio(false);
         let alerta = await alertasComponent.crearModalAlerta({
                             titulo: "Advertencia",
-                            leyenda: "Esta seguro de enviar los datos",
+                            leyenda: "¿Está seguro de enviar los datos?",
                             icono: 5,
                             activaCancelacion: true,
                             TextoConfirmacion: "Enviar",
@@ -83,9 +83,9 @@ let AgregarDatosFaltan = () => {
         {
             e.preventDefault();
             alerta = await alertasComponent.crearModalAlerta({
-                titulo: "Cancelado",
-                leyenda: "Debe enviar estos parametros para iniciar sesion",
-                icono: 3,
+                titulo: "Informativo",
+                leyenda: "La operación fue cancelada.",
+                icono: 4,
                 activaCancelacion: false,
                 TextoConfirmacion: "Ok",
                 textoCancelacion: "",
@@ -101,9 +101,9 @@ let AgregarDatosFaltan = () => {
         {
             e.preventDefault();
             alerta = await alertasComponent.crearModalAlerta({
-                titulo: "Error",
-                leyenda: "Verifique el correo electronico sea valido y la contrasena no este vacia",
-                icono: 2,
+                titulo: "Informativo",
+                leyenda: "Verifique que el correo electrónico sea válido y la contraseña no esté vacía.",
+                icono: 3,
                 activaCancelacion: false,
                 TextoConfirmacion: "Ok",
                 textoCancelacion: "",
@@ -118,15 +118,15 @@ let AgregarDatosFaltan = () => {
         setEspera(true);
 
         try {
-            let pet = await ajax.post(urlAjax.ASIGNAR_OBLIGATORIOS, datos, 
+            await ajax.post(urlAjax.ASIGNAR_OBLIGATORIOS, datos, 
                 {headers: {
                     'Content-Type': 'application/json',
                     'Authorization': sessionStorage.getItem("Authorization")
                   }});
             setEspera(false);
-            alerta = await alertasComponent.crearModalAlerta({
+            await alertasComponent.crearModalAlerta({
                 titulo: "Ok",
-                leyenda: "Los datos fueron agregados correctamente, la proxima ves que inicie sesion utilice la contrasena nueva",
+                leyenda: "Los datos fueron agregados correctamente. La próxima vez que inicie sesión, utilice la contraseña nueva.",
                 icono: 1,
                 activaCancelacion: false,
                 TextoConfirmacion: "Ok",
@@ -137,9 +137,9 @@ let AgregarDatosFaltan = () => {
             });
         } catch (error) {
             setEspera(false);
-            alerta = await alertasComponent.crearModalAlerta({
+            await alertasComponent.crearModalAlerta({
                 titulo: "Error",
-                leyenda: "Error interno notificar con el jefe de departamento la situacion",
+                leyenda: "Error interno: notificar con el jefe de departamento la situación.",
                 icono: 2,
                 activaCancelacion: false,
                 TextoConfirmacion: "Ok",
@@ -153,6 +153,7 @@ let AgregarDatosFaltan = () => {
     };
 
     useEffect( ()=>{
+
         let revisa = async () => {
             await revisarDatos();
         };
@@ -162,7 +163,7 @@ let AgregarDatosFaltan = () => {
     return(
         <Modal
         open={obligatorio}
-        aria-labelledby="Titulo Necesario"
+        aria-labelledby="Título Necesario"
         aria-describedby="Necesario" >
             <Box sx={{height:"100vh", width:"100%", display:"flex", alignItems:"center", justifyContent:"center"}}>
                 <Cargando bool={espera} />
@@ -175,18 +176,18 @@ let AgregarDatosFaltan = () => {
                             onChange={ (e) => cambiarCorreo(e) }
                             sx={{marginRight:"1%", width:"49%"}}
                             variant="filled"
-                            label="Correo electronico"
-                            placeholder="Correo electronico" />
+                            label="Correo electrónico"
+                            placeholder="Correo electrónico" />
                             <TextField
                             onChange={ (e) => cambiarContra(e) }
                             multiline
                             variant="filled"
-                            label="Restablecer contrasena"
-                            placeholder="Restablecer contrasena" />
+                            label="Restablecer contraseña"
+                            placeholder="Restablecer contraseña" />
                         </Box>
                         <Box sx={{display:"flex", alignItems:"center", justifyContent:"center"}}>
                             <Button variant="contained" size="large" color="success" onClick={ejecutarAjax} >
-                                Enviar correo y restablecer contrasena
+                                Enviar correo y restablecer contraseña
                             </Button>
                             <Logout />
                         </Box>

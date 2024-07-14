@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useState } from "react";
 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -20,12 +19,14 @@ import SendIcon from '@mui/icons-material/Send';
 
 import ajax from "../ConfigAxios";
 import urlAjax from '../propiedades.json';
-import FechaHoraReposicion from './FechaHoraReposicion';
-import { recargarDatos } from "./reducerAutenticacion/UsuarioSlice";
+import { useSelector } from "react-redux";
 
 import Cargando from "./Cargando";
 import { Alertas } from "./Alertas";
-import NavarUsuario from "./NavarUsuario";
+import NavarAdmin from './NavarAdmin';
+import FechaHoraReposicionAbierta from "./FechaHoraReposicionAbierta";
+
+import '../css/sidebar.css';
 
 /**
  * DATOS DE INCIDENCIA 1
@@ -33,7 +34,7 @@ import NavarUsuario from "./NavarUsuario";
  * 
 */
 
-let Reposicion = () => {
+let ReposicionAbierta = () => {
     const estilosCard = {
         backgroundColor: "rgba(255, 255, 255, 0.706)",
         borderStyle: "solid",
@@ -44,7 +45,6 @@ let Reposicion = () => {
     const EstiloTimePicker = {
         width: '98%!important',
     };
-
     //CREAR COMPONENTE DE ALERTAS
     const alertasComponent = Alertas();
 
@@ -57,23 +57,18 @@ let Reposicion = () => {
     const [fechaCom, setFechaCom] = useState([]);
     const [horaChecIniCom, setHoraChecIniCom] = useState([]);
     const [horaChecFinCom, setHoraChecFinCom] = useState([]);
+    const [horaCubre, setHoraCubre] = useState([]);
     //CAMPOS DE DATOS DE INCIDENCIA
     const [valorObserv, setValorObserv] = useState("");
     const [fechaInc, setFechaInc] = useState("");
     const [horaChecIni, setHoraChecIni] = useState(null);
     const [horaChecFin, setHoraChecFin] = useState(null);
-    //BASIFICADO
-    const [basificado, setBasificado] = useState(0);
 
     //DATOS USUARIO
-    const usuario = useSelector( state => state.usuario.nombreUsuario );
-    const despacha = useDispatch();
     const [tarjetaCic, setTarjetaCic] = useState("");
 
-    let deshabilitarFinesSem = (dia) => {
-        let dayOfWeek = dia["$d"].getDay();
-        return dayOfWeek === 0 || dayOfWeek === 6;
-    };
+    let cambiarTarjeta = (e) => setTarjetaCic(e.target.value);
+
     let agregarCompensacion = () => {
         setCompesarDin([ ...compesarDin, { index:compesarDin.length+1 } ]);
         setFechaCom([...fechaCom, {index: compesarDin.length+1, fecha: "", bool:false}]);
@@ -101,6 +96,21 @@ let Reposicion = () => {
                 numero = numero.replace(numero.charAt(i), "");
 
         setValorObserv(menos+numero);
+    };
+    let setHorasCubre = (e, index) => {
+
+        let numero = e.target.value;
+        let izq = horaCubre.filter( iterador => iterador.index < index );
+        let der = horaCubre.filter( iterador => iterador.index > index );
+
+        if( index == null )
+            return;
+
+        for(let i=0; i<numero.length; i++)
+            if( !(numero.charAt(i).charCodeAt() > 47 && numero.charAt(i).charCodeAt() < 58) )
+                numero = numero.replace(numero.charAt(i), "");
+
+        setHoraCubre([ ...izq, { index:index, numero: numero }, ...der ]);
     };
     let setFecha = (e, index) => {
         let ano = (e["$d"].getFullYear())+"";
@@ -172,17 +182,6 @@ let Reposicion = () => {
             let horaChecIniComBool = horaChecIniCom.find( (iterador) => !iterador.bool );
             let horaChecFinComBool = horaChecFinCom.find( (iterador) => !iterador.bool );
 
-            if( fechaInc.length == 0 )
-                bool = false;
-            if( basificado != 1 )
-            {
-                if( horaChecIni == null )
-                    bool = false;
-                if( horaChecFin == null )
-                    bool = false;
-            }
-            if( valorObserv.length == 0 )
-                bool = false;
             if( Array.isArray(fechaComBool) )
                 if( fechaComBool.length > 0 )
                     bool = false;
@@ -237,12 +236,18 @@ let Reposicion = () => {
         for(let i=0; i<fechaCom.length; i++)
             array.push({ fecha: fechaCom[i].fecha, 
                             horaInicio: horaChecIniCom[i].horaIni, 
-                            horaFin: horaChecFinCom[i].horaFin  });
+                            horaFin: horaChecFinCom[i].horaFin,
+                            horaCubre: horaCubre[i].numero  });
 
         try {
-            let datos = { fechInc: fechaInc, horIniInc: horaChecIni,
-                            horFinInc: horaChecFin, obs: valorObserv,
-                            usuario: usuario, reposicion: array };
+            let datos = { 
+                            fechInc: fechaInc, 
+                            horIniInc: horaChecIni,
+                            horFinInc: horaChecFin, 
+                            obs: valorObserv,
+                            tarjetaCic: tarjetaCic, 
+                            reposicion: array
+                        };
 
             alertaModal = await alertasComponent.crearModalAlerta({
                 titulo: "Advertencia",
@@ -255,6 +260,7 @@ let Reposicion = () => {
                 activa: true,
                 colorConfirmar: "#2e7d32"
             });
+
             if( !alertaModal )
             {
                 e.preventDefault();
@@ -273,12 +279,14 @@ let Reposicion = () => {
             }
             setEspera(true);
 
-            await ajax.post(urlAjax.REPOSICION, datos, 
+            await ajax.post(urlAjax.REPOSICION_ABIERTA, datos, 
                 {headers: {
                     'Content-Type': 'application/json',
                     'Authorization': sessionStorage.getItem("Authorization")
                   }});
+
             setEspera(false);
+            
             await alertasComponent.crearModalAlerta({
                 titulo: "Ok",
                 leyenda: "La incidencia fue enviada en espera de autorización. Se le enviará correo electrónico con el estatus de su incidencia.",
@@ -296,21 +304,33 @@ let Reposicion = () => {
         }
     };
 
-    useEffect( () => {
-        let dat = JSON.parse(sessionStorage.getItem("datosProf"));
-        despacha( recargarDatos() );
-        setTarjetaCic(dat[0].tarjetaCic);
-        setBasificado(dat[0].basificado);
-    }, [] );
-
     return(
-        <Grid container>
-            <Grid item xs={3} 
-                sx={{height:"98vh", backgroundColor:"rgba(0, 0, 0, 0.85)"}} >
-                <NavarUsuario nav={1} />
+        <Grid container sx={{overflow:"hidden"}}>
+            <Grid item xs={3} sx={{height:"98vh", backgroundColor:"rgba(0, 0, 0, 0.85)"}} >
+                <NavarAdmin nav={3} />
             </Grid>
-            <Grid item xs={9} sx={{maxHeight:"98vh", overflow:"scroll"}}>
+            <Grid item xs={9} sx={{maxHeight:"98vh", overflow:"scroll"}} >
                 <Cargando bool={espera} />
+                <Card sx={estilosCard}>
+                        <Typography component={"p"} variant='h4' sx={{textAlign:"center"}}>
+                            Ingrese la tarjeta cic del profesor para crear su reposici&oacute;n de horario
+                        </Typography>
+                        <CardContent>
+                            <Grid container>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        sx={EstiloTimePicker}
+                                        multiline
+                                        variant="filled"
+                                        label="Numero de tarjeta cic"
+                                        placeholder="Numero de tarjeta cic"
+                                        value={tarjetaCic}
+                                        onChange={ e  => cambiarTarjeta(e) }
+                                        />
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                </Card>
                 <Card sx={estilosCard}>
                     <CardContent>
                         <Typography component={"p"} variant='h4' sx={{textAlign:"center"}}>
@@ -323,8 +343,7 @@ let Reposicion = () => {
                                     adapterLocale="en-gb" >
                                         <DemoContainer components={['DatePicker', 'TimePicker']}>
                                             <DatePicker sx={EstiloTimePicker} label="Fecha incidencia" 
-                                                onChange={(event) => setFecha(event, null)}
-                                                shouldDisableDate={deshabilitarFinesSem} />
+                                                onChange={(event) => setFecha(event, null)} />
                                         </DemoContainer>
                                     </LocalizationProvider>
                                 </Grid>
@@ -397,12 +416,14 @@ let Reposicion = () => {
                         <Grid container>
                             {
                                 compesarDin.map( (iterador) => (
-                                    <FechaHoraReposicion index={iterador.index}
+                                    <FechaHoraReposicionAbierta 
+                                    index={iterador.index}
                                     setFecha={setFecha}
                                     setHoraInicio={setHoraInicio}
                                     setHoraFinal={setHoraFinal}
-                                    indice={iterador.index}
-                                    activa={true} />
+                                    setHorasCubre={setHorasCubre}
+                                    horaCubre={horaCubre}
+                                    indice={iterador.index} />
                                 ) )
                             }
                         </Grid>
@@ -426,4 +447,4 @@ let Reposicion = () => {
     )
 };
 
-export default Reposicion;
+export default ReposicionAbierta;

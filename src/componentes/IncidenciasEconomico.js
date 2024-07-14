@@ -4,7 +4,6 @@ import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { Simples } from "./Alertas";
 import Logout from "./Logout";
 import { MenuList } from "@material-ui/core";
 import { NavLink } from "react-router-dom";
@@ -24,15 +23,16 @@ import ajax from "../ConfigAxios";
 import urlAjax from '../propiedades.json';
 import Cargando from './Cargando';
 import { Alertas } from "./Alertas";
+import NavarAdmin from './NavarAdmin';
 
 import '../css/incidencias.css';
 
 let IncidenciasEconomico = () => {
     const [alertaSimple, setAlertaSimple] = useState({ msm: "", activa: false, icono: 0 });
     
-    let cambiarMsm = (obj) => {
+    /*let cambiarMsm = (obj) => {
         setAlertaSimple(obj);
-    };
+    };*/
 
     //ESTILOS
     const navar = {
@@ -47,10 +47,10 @@ let IncidenciasEconomico = () => {
     const alertasComponent = Alertas();
 
     //FILTROS de incidencias
-    const [busqueda, setBusqueda] = useState("");
-    const [fechaIni, setFechaIni] = useState(dayjs('1970-01-01'));
-    const [fechaFin, setFechaFin] = useState(dayjs('1970-01-01'));
-    const [paginacion, setPaginacion] = useState(1);
+    const [busqueda, setBusqueda] = useState(null);
+    const [fecha, setFecha] = useState(null);
+    const [cantPaginas, setCantPaginas] = useState(1);
+    const [paginaActual, setPaginaActual] = useState(1);
 
     //VARIABLE MENAJO DE MODAL CARGANDO
     const [espera, setEspera] =useState(false);
@@ -81,8 +81,20 @@ let IncidenciasEconomico = () => {
                   }});
 
             let datosResp = await pet.data;
+
+            if( datosResp.cant > 10 )
+            {
+                let temp = parseInt(datosResp.cant)%10 > 0 ? parseInt(parseInt(datosResp.cant)/10) + 1 : parseInt(datosResp.cant)/10;
+                setCantPaginas(temp);
+                setPaginaActual(obj.paginacion);
+            }
+            else
+            {
+                setCantPaginas(1);
+                setPaginaActual(1);
+            }
             
-            setPdf(datosResp);
+            setPdf(datosResp.lista);
             setEspera(false);
 
         } catch (error) {
@@ -90,117 +102,111 @@ let IncidenciasEconomico = () => {
         }
     };
 
+    let cambiaPaginacion = async (e, valor) => {
+
+        if( valor == paginaActual )
+            return;
+
+        setPaginaActual(valor);
+
+        let datos = {    
+            fechaIni: fecha,
+            fechaFin: fecha,
+            busqueda: busqueda,
+            paginacion: valor   };
+
+        await ejecutarAjax(datos);
+    };
+
+    let cambiarBusqueda = async (e) => {
+        setBusqueda(e.target.value);
+
+        let datos = {    
+            fechaIni: fecha,
+            fechaFin: fecha,
+            busqueda: e.target.value,
+            paginacion: paginaActual };
+
+        await ejecutarAjax(datos);
+    };
+    let cambiarFecha = async (e) => {
+
+        setFecha(crearCadenaFecha(e["$d"]));
+
+        let datos = {    
+            fechaIni: crearCadenaFecha(e["$d"]),
+            fechaFin: crearCadenaFecha(e["$d"]), 
+            busqueda: busqueda,
+            paginacion: paginaActual };
+
+        await ejecutarAjax(datos);
+    };
+
     useEffect( () => {
         let datos = {    
-            fechaIni: null, 
-            fechaFin: null, 
+            fechaIni: null,
+            fechaFin: null,
             busqueda: null,
             paginacion: 1   };
 
-        setTimeout(async () => {
-            await ejecutarAjax(datos);
-        }, 0);
+        setTimeout(async () => { await ejecutarAjax(datos); }, 0);
     }, [] );
 
     return(
-        <>
-            <Grid container >
-                <Grid item xs={3} >
-                    <div style={{height:"98vh", backgroundColor:"rgba(0, 0, 0, 0.85)"}}>
-                        <MenuList>
-                            <MenuItem >
-                                <NavLink 
-                                    className={"link"}
-                                    aria-current={"Carga datos de profesor"}
-                                    to={"/menu-administrador/cargaDatProf"} >
-                                        <Typography component="span" variant="h5" textAlign={"right"} >
-                                            Carga datos de profesor
-                                        </Typography>
-                                </NavLink>
-                            </MenuItem>
-                            <MenuItem >
-                                <NavLink
-                                    className={"link"} 
-                                    aria-current={"Carga datos de profesor"}
-                                    to={"/menu-administrador/inciencias"} >
-                                        <Typography component="span" variant="h5" textAlign={"right"} >
-                                            Inciencias
-                                        </Typography>
-                                </NavLink>
-                            </MenuItem>
-                            <MenuItem >
-                                <NavLink
-                                    className={"link"} 
-                                    aria-current={"Parametros"}
-                                    to={"/menu-administrador/parametros"} >
-                                        <Typography component="span" variant="h5" textAlign={"right"} >
-                                            Parametros
-                                        </Typography>
-                                </NavLink>
-                            </MenuItem>
-                            <MenuItem >
-                                <NavLink
-                                    className={"sidebar"} 
-                                    aria-current={"Dias Economicos"}
-                                    to={"/menu-administrador/incidenciasEconomicos"} >
-                                        <Typography component="span" variant="h5" textAlign={"right"} >
-                                            Dias Economicos
-                                        </Typography>
-                                </NavLink>
-                            </MenuItem>
-                        </MenuList>
-                        <Logout/>
-                    </div>
-                </Grid>
-                <Grid item xs={9} >
-                    <Simples obj={alertaSimple} />
-                    <Grid item xs={12} >
-                        <Cargando bool={espera} />
-                        <AppBar componenGrt={"nav"} position="static" style={navar}>
-                            <Toolbar>
-                                <Box sx={{width:"50%", paddingRight:"1%"}}>
-                                    <Search/>
+        <Grid container >
+            <Grid item xs={3} >
+                <Box sx={{height:"98vh", backgroundColor:"rgba(0, 0, 0, 0.85)"}}>
+                    <NavarAdmin sx={{backgroundColor:"rgba(0, 0, 0, 0.85)"}} nav={7} />
+                </Box>
+            </Grid>
+            <Grid item xs={9} >
+                <Grid item xs={12} >
+                    <Cargando bool={espera} />
+                    <AppBar componenGrt={"nav"} position="static" style={navar}>
+                        <Toolbar>
+                            <Box sx={{width:"70%", paddingRight:"1%"}}>
+                                <Search value={busqueda} 
+                                onChange={ (e) => { cambiarBusqueda(e) } }/>
+                            </Box>
+                            <Box sx={{width:"30%", paddingLeft:"1%", display:"flex"}}>
+                                <Box sx={{width:"100%", paddingRight:"1%"}}>
+                                    <LocalizationProvider dateAdapter={AdapterDayjs} >
+                                        <DemoContainer components={['DatePicker']} >
+                                            <DatePicker label="Fecha economico"
+                                            onChange={ (e) => { cambiarFecha(e) } }
+                                            value={dayjs(fecha)}
+                                            inputProps={{ readOnly: true }} />
+                                        </DemoContainer>
+                                    </LocalizationProvider>
                                 </Box>
-                                <Box sx={{width:"50%", paddingLeft:"1%", display:"flex"}}>
-                                    <Box sx={{width:"50%", paddingRight:"1%"}}>
-                                        <LocalizationProvider dateAdapter={AdapterDayjs} >
-                                            <DemoContainer components={['DatePicker']} >
-                                                <DatePicker label="Fecha inicio"/>
-                                            </DemoContainer>
-                                        </LocalizationProvider>
-                                    </Box>
-                                    <Box sx={{width:"50%", paddingLeft:"1%"}}>
-                                        <LocalizationProvider dateAdapter={AdapterDayjs} >
-                                            <DemoContainer components={['DatePicker']}>
-                                                <DatePicker label="Fecha fin"
-                                                slotProps={{
-                                                    TextField:{ estilosFechas }
-                                                }} />
-                                            </DemoContainer>
-                                        </LocalizationProvider>
-                                    </Box>
-                                </Box>
-                            </Toolbar>
-                        </AppBar>
-                        <section className="listaDocsPdf">
-                            <Grid item xs={12}>
-                                <Grid container >
-                                    {
-                                        pdf.map( (iterador) => (
-                                            <DocPdf key={iterador.numero_serie} 
-                                                    resp={iterador} />
-                                        ) )
-                                    }
-                                </Grid>
+                            </Box>
+                        </Toolbar>
+                    </AppBar>
+                    <section className="listaDocsPdf">
+                        <Grid item xs={12}>
+                            <Grid container >
+                                {
+                                    pdf.map( (iterador) => (
+                                        <DocPdf key={iterador.numero_serie} 
+                                                resp={iterador} />
+                                    ) )
+                                }
                             </Grid>
-                        </section>
-                        <section className="paginacion">
-                            <Pagination count={10} variant="outlined" shape="rounded" />
-                        </section>
-                    </Grid>
+                        </Grid>
+                    </section>
+                    <Box display={"flex"} 
+                    justifyContent={"center"}
+                    backgroundColor={"#0000001a"}>
+                        <Pagination 
+                        count={cantPaginas}
+                        page={paginaActual}
+                        onChange={ cambiaPaginacion }
+                        variant="outlined" 
+                        shape="rounded"/>
+                    </Box>
                 </Grid>
             </Grid>
-        </>
+        </Grid>
     );
 };
 

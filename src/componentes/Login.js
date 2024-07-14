@@ -66,7 +66,7 @@ let Login = function ()
             else if (roles[0].role.length > 0)
             {
                 despacha(conAcceso({ val: "2" , token: datos.token }));
-                url("/menu-usuario");
+                url("/menu-usuario/reposicion");
             }
             else
             {

@@ -1,11 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Grid";
@@ -18,11 +16,9 @@ import ajax from "../ConfigAxios";
 import urlAjax from '../propiedades.json';
 import Cargando from './Cargando';
 import { Alertas } from "./Alertas";
-import NavarUsuario from "./NavarUsuario";
+import dayjs from 'dayjs';
 
-import { useSelector } from "react-redux";
-
-let Corrimiento = () => {
+let ModalEconomico = ({datos, cerrarModal}) => {
     const estilosCard = {
         backgroundColor: "rgba(255, 255, 255, 0.706)",
         borderStyle: "solid",
@@ -37,22 +33,14 @@ let Corrimiento = () => {
     //CREAR COMPONENTE DE ALERTAS
     const alertasComponent = Alertas();
 
-    //DATOS USUARIO
-    const usuario = useSelector( state => state.usuario.nombreUsuario );
-
     //DATOS DE LA INCIDENCIA
-    const [fechaInc, setFechaInc] = useState("");
-    const [horaChecIni, setHoraChecIni] = useState("");
-    const [horaChecFin, setHoraChecFin] = useState("");
+    const [fechaIni, setFechaIni] = useState("");
+    const [fechaFin, setFechaFin] = useState("");
 
     //VARIABLE MENAJO DE MODAL CARGANDO
     const [espera, setEspera] =useState(false);
 
-    let deshabilitarFinesSem = (dia) => {
-        let dayOfWeek = dia["$d"].getDay();
-        return dayOfWeek === 0 || dayOfWeek === 6;
-    };
-    let setFecha = (e) => {
+    let setFechaInicio = (e) => {
         let ano = (e["$d"].getFullYear())+"";
         let mes = (e["$d"].getMonth()+1)+"";
         let dia = (e["$d"].getDate())+"";
@@ -60,43 +48,26 @@ let Corrimiento = () => {
         mes = mes.length <= 1 ? "0"+mes : mes;
         dia = dia.length <= 1 ? "0"+dia : dia;
 
-        setFechaInc(ano+"-"+mes+"-"+dia);
+        setFechaIni(ano+"-"+mes+"-"+dia);
     };
+    let setFechaFinal = (e) => {
+        let ano = (e["$d"].getFullYear())+"";
+        let mes = (e["$d"].getMonth()+1)+"";
+        let dia = (e["$d"].getDate())+"";
 
-    let horaIni = (e) => {
-        let hora = (e["$d"].getHours())+"";
-        let min = (e["$d"].getMinutes())+"";
-        let seg = (e["$d"].getSeconds())+"";
+        mes = mes.length <= 1 ? "0"+mes : mes;
+        dia = dia.length <= 1 ? "0"+dia : dia;
 
-        hora = hora.length <= 1 ? "0"+hora : hora;
-        min = min.length <= 1 ? "0"+min : min;
-        seg = seg.length <= 1 ? "0"+seg : seg;
-
-        setHoraChecIni(hora+":"+min+":"+seg);
+        setFechaFin(ano+"-"+mes+"-"+dia);
     };
-
-    let horaFin = (e) => {
-        let hora = (e["$d"].getHours())+"";
-        let min = (e["$d"].getMinutes())+"";
-        let seg = (e["$d"].getSeconds())+"";
-
-        hora = hora.length <= 1 ? "0"+hora : hora;
-        min = min.length <= 1 ? "0"+min : min;
-        seg = seg.length <= 1 ? "0"+seg : seg;
-
-        setHoraChecFin(hora+":"+min+":"+seg);
-    };
-
     let validacion = () => {
         let bool = true;
 
         try{
 
-            if( fechaInc.length == 0 )
+            if( fechaIni.length == 0 )
                 bool = false;
-            if( horaChecIni.length == 0 )
-                bool = false;
-            if( horaChecFin.length == 0 )
+            if( fechaFin.length == 0 )
                 bool = false;
 
         }catch(error){
@@ -106,7 +77,19 @@ let Corrimiento = () => {
         return bool;
 
     };
-
+    let tratameintoError = async (respuesta) => {
+        await alertasComponent.crearModalAlerta({
+            titulo: "Error",
+            leyenda: respuesta.msm,
+            icono: 2,
+            activaCancelacion: false,
+            TextoConfirmacion: "Cerrar",
+            textoCancelacion: "",
+            colorCancelar: "",
+            activa: true,
+            colorConfirmar: "#d32f2f"
+        });
+    };
     let peticion = async (e) => {
         let alertaModal = null;
 
@@ -115,27 +98,26 @@ let Corrimiento = () => {
             e.preventDefault();
             await alertasComponent.crearModalAlerta({
                 titulo: "Informativo",
-                leyenda: "Revisar que todos los campos se encuentren llenos.",
+                leyenda: "Revisar que todos los campos estén llenos.",
                 icono: 3,
                 activaCancelacion: false,
                 TextoConfirmacion: "Ok",
-                textoCancelacion: "Cancelar",
-                colorCancelar: "#d32f2f",
+                textoCancelacion: "",
+                colorCancelar: "",
                 activa: true,
-                colorConfirmar: "#2e7d32"
+                colorConfirmar: "#d32f2f"
             });
             return;
         }
 
         try {
-            let datos = { fechInc: fechaInc, horIniInc: horaChecIni,
-                            horFinInc: horaChecFin,
-                            usuario: usuario };
+            let datos = { fechaIni: fechaIni, 
+                            fechaFin: fechaFin };
 
             alertaModal = await alertasComponent.crearModalAlerta({
                 titulo: "Advertencia",
                 leyenda: "¿Está seguro de enviar la incidencia?",
-                icono: 5,
+                icono: 4,
                 activaCancelacion: true,
                 TextoConfirmacion: "Enviar",
                 textoCancelacion: "Cancelar",
@@ -152,8 +134,8 @@ let Corrimiento = () => {
                     icono: 4,
                     activaCancelacion: false,
                     TextoConfirmacion: "Ok",
-                    textoCancelacion: "Cancelar",
-                    colorCancelar: "#d32f2f",
+                    textoCancelacion: "",
+                    colorCancelar: "",
                     activa: true,
                     colorConfirmar: "#2e7d32"
                 });
@@ -161,15 +143,15 @@ let Corrimiento = () => {
             }
             setEspera(true);
 
-            await ajax.post(urlAjax.CORRIMIENTO, datos, 
+            await ajax.post(urlAjax.DIAECONOMICO_ABIERTA, datos, 
                 {headers: {
                     'Content-Type': 'application/json',
                     'Authorization': sessionStorage.getItem("Authorization")
-                  }});
+                    }});
             setEspera(false);
             await alertasComponent.crearModalAlerta({
                 titulo: "Ok",
-                leyenda: "La incidencia fue enviada. Se encuentra en espera de autorización. Se le enviará correo electrónico con el estatus de su incidencia.",
+                leyenda: "La incidencia fue enviada en espera de autorización. Se le enviará correo electrónico con el estatus de su incidencia.",
                 icono: 1,
                 activaCancelacion: false,
                 TextoConfirmacion: "Ok",
@@ -180,27 +162,18 @@ let Corrimiento = () => {
             });
         } catch (e) {
             setEspera(false);
-            await alertasComponent.crearModalAlerta({
-                titulo: "Error",
-                leyenda: e.response.data,
-                icono: 2,
-                activaCancelacion: false,
-                TextoConfirmacion: "Cerrar",
-                textoCancelacion: "",
-                colorCancelar: "",
-                activa: true,
-                colorConfirmar: "#d32f2f"
-            });
+            await tratameintoError(e.response.data);
         }
     };
-    
+
+    useEffect( () => {
+        setFechaIni(datos.fecha_ini_compensacion);
+        setFechaFin(datos.fecha_fin_compensacion);
+    }, [] );
+
     return(
-        <Grid container>
-            <Grid item xs={3} 
-                sx={{height:"98vh", backgroundColor:"rgba(0, 0, 0, 0.85)"}} >
-                <NavarUsuario nav={2} />
-            </Grid>
-            <Grid item xs={9} sx={{maxHeight:"98vh", overflow:"scroll"}}>
+        <Grid container sx={{backgroundColor:"#ffffffc9"}}>
+            <Grid item xs={12} sx={{maxHeight:"98vh", overflow:"scroll"}}>
                 <Cargando bool={espera} />
                 <Card sx={estilosCard}>
                     <CardContent>
@@ -208,48 +181,25 @@ let Corrimiento = () => {
                             Datos de la incidencia
                         </Typography>
                         <Grid container>
-                            <Grid item xs={4}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb">
+                            <Grid item xs={6}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb" >
                                     <DemoContainer components={['DatePicker', 'TimePicker']}>
                                         <DatePicker
-                                        onChange={(event) => { setFecha(event) }}
-                                        sx={EstiloTimePicker} 
-                                        label="Fecha incidencia"
-                                        shouldDisableDate={deshabilitarFinesSem} />
+                                        onChange={(event) => { setFechaInicio(event) }} 
+                                        sx={EstiloTimePicker}
+                                        label="Fecha inicio"
+                                        value={dayjs(fechaIni)} />
                                     </DemoContainer>
                                 </LocalizationProvider>
                             </Grid>
-                            <Grid item xs={4}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs} >
+                            <Grid item xs={6}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb" >
                                     <DemoContainer components={['DatePicker', 'TimePicker']}>
-                                        <TimePicker
-                                        onChange={(event) => { horaIni(event) }}
+                                        <DatePicker
+                                        onChange={(event) => { setFechaFinal(event) }} 
                                         sx={EstiloTimePicker}
-                                        label="Hora checada inicio"
-                                        ampm={false}
-                                        viewRenderers={{
-                                            hours: renderTimeViewClock,
-                                            minutes: renderTimeViewClock,
-                                            seconds: renderTimeViewClock,
-                                            }}
-                                        />
-                                    </DemoContainer>
-                                </LocalizationProvider>
-                            </Grid>
-                            <Grid item xs={4}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs} >
-                                    <DemoContainer components={['DatePicker', 'TimePicker']}>
-                                        <TimePicker
-                                        onChange={(event) => { horaFin(event) }}
-                                        sx={EstiloTimePicker}
-                                        label="Hora checada fin"
-                                        ampm={false}
-                                        viewRenderers={{
-                                            hours: renderTimeViewClock,
-                                            minutes: renderTimeViewClock,
-                                            seconds: renderTimeViewClock,
-                                            }}
-                                        />
+                                        label="Fecha fin"
+                                        value={dayjs(fechaFin)} />
                                     </DemoContainer>
                                 </LocalizationProvider>
                             </Grid>
@@ -266,6 +216,11 @@ let Corrimiento = () => {
                             onClick={ (event) =>{ peticion(event) } }    >
                                 Enviar incidencia
                             </Button>
+                            <Button variant="contained"
+                            color="error"
+                            onClick={ cerrarModal }    >
+                                Cerrar
+                            </Button>
                         </Grid>
                     </CardContent>
                 </Card>
@@ -274,4 +229,4 @@ let Corrimiento = () => {
     )
 };
 
-export default Corrimiento;
+export default ModalEconomico;

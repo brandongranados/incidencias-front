@@ -11,43 +11,17 @@ import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import 'dayjs/locale/en-gb';
 
-
-
-
-
-
-
-import { Simples } from "./Alertas";
-import Logout from "./Logout";
-import { MenuList } from "@material-ui/core";
-import { NavLink } from "react-router-dom";
-import { MenuItem } from '@material-ui/core';
 import '../css/sidebar.css';
-
-
-
-
-
-
-
 
 import ajax from "../ConfigAxios";
 import urlAjax from '../propiedades.json';
 import Cargando from './Cargando';
 import { Alertas } from "./Alertas";
+import NavarAdmin from './NavarAdmin';
 
 let Parametros = ({pag}) => {
-    const [alertaSimple, setAlertaSimple] = 
-        useState({
-                    msm: "",
-                    activa: false,
-                    icono: 0
-                });
-    
-    let cambiarMsm = (obj) => {
-        setAlertaSimple(obj);
-    };
 
     const estilosCard = {
         backgroundColor: "rgba(255, 255, 255, 0.706)",
@@ -80,7 +54,7 @@ let Parametros = ({pag}) => {
 
             let alertaModal = await alertasComponent.crearModalAlerta({
                 titulo: "Advertencia",
-                leyenda: "Esta seguro de actulizar el contador. El contador regresara el conteo a 1 despues de realaizar un memo con el conteo personalizado",
+                leyenda: "¿Está seguro de actualizar el contador?. El contador regresará el conteo a 1 después de realizar un memo con el conteo personalizado.",
                 icono: 5,
                 activaCancelacion: true,
                 TextoConfirmacion: "Actualizar",
@@ -94,15 +68,15 @@ let Parametros = ({pag}) => {
             {
                 e.preventDefault();
                 await alertasComponent.crearModalAlerta({
-                    titulo: "Cancelado",
-                    leyenda: "Operacion cancelada",
-                    icono: 2,
+                    titulo: "Informativo",
+                    leyenda: "La operación fue cancelada.",
+                    icono: 4,
                     activaCancelacion: false,
-                    TextoConfirmacion: "Cerrar",
-                    textoCancelacion: "Cancelar",
-                    colorCancelar: "#d32f2f",
+                    TextoConfirmacion: "Ok",
+                    textoCancelacion: "",
+                    colorCancelar: "",
                     activa: true,
-                    colorConfirmar: "#d32f2f"
+                    colorConfirmar: "#2e7d32"
                 });
                 return;
             }
@@ -119,7 +93,7 @@ let Parametros = ({pag}) => {
             
             await alertasComponent.crearModalAlerta({
                 titulo: "Ok",
-                leyenda: "Operacion exitosa",
+                leyenda: "Operación exitosa.",
                 icono: 1,
                 activaCancelacion: false,
                 TextoConfirmacion: "Cerrar",
@@ -134,7 +108,7 @@ let Parametros = ({pag}) => {
 
             await alertasComponent.crearModalAlerta({
                 titulo: "Error",
-                leyenda: "Error al intentar actualizar el contador, intentelo de nuevo por favor",
+                leyenda: "Error al intentar actualizar el contador, inténtelo de nuevo, por favor.",
                 icono: 2,
                 activaCancelacion: false,
                 TextoConfirmacion: "Cerrar",
@@ -155,10 +129,7 @@ let Parametros = ({pag}) => {
 
             let alertaModal = await alertasComponent.crearModalAlerta({
                 titulo: "Advertencia",
-                leyenda: "Esta seguro de actulizar las fechas inicio y final de la quicena."+ 
-                        " Todos los dias se actulizara estas fechas por lo que si desea "+
-                        "mantener las fechas personalizadas debera cambiarlas cada dia que"+
-                        "se extiende.",
+                leyenda: "¿Está seguro de actualizar las fechas de inicio y final de la quincena? Todos los días se actualizarán estas fechas, por lo que si, desea mantener las fechas personalizadas, deberá cambiarlas cada día que se extiende.",
                 icono: 5,
                 activaCancelacion: true,
                 TextoConfirmacion: "Actualizar",
@@ -172,15 +143,15 @@ let Parametros = ({pag}) => {
             {
                 e.preventDefault();
                 await alertasComponent.crearModalAlerta({
-                    titulo: "Cancelado",
-                    leyenda: "Operacion cancelada",
-                    icono: 2,
+                    titulo: "Informativo",
+                    leyenda: "La operación fue cancelada.",
+                    icono: 4,
                     activaCancelacion: false,
-                    TextoConfirmacion: "Cerrar",
-                    textoCancelacion: "Cancelar",
-                    colorCancelar: "#d32f2f",
+                    TextoConfirmacion: "Ok",
+                    textoCancelacion: "",
+                    colorCancelar: "",
                     activa: true,
-                    colorConfirmar: "#d32f2f"
+                    colorConfirmar: "#2e7d32"
                 });
                 return;
             }
@@ -197,7 +168,7 @@ let Parametros = ({pag}) => {
             
             await alertasComponent.crearModalAlerta({
                 titulo: "Ok",
-                leyenda: "Operacion exitosa",
+                leyenda: "Operación exitosa.",
                 icono: 1,
                 activaCancelacion: false,
                 TextoConfirmacion: "Cerrar",
@@ -211,7 +182,7 @@ let Parametros = ({pag}) => {
 
             await alertasComponent.crearModalAlerta({
                 titulo: "Error",
-                leyenda: "Error al intentar actualizar el contador, intentelo de nuevo por favor",
+                leyenda: "Error al intentar actualizar el contador, inténtelo de nuevo, por favor.",
                 icono: 2,
                 activaCancelacion: false,
                 TextoConfirmacion: "Cerrar",
@@ -275,128 +246,83 @@ let Parametros = ({pag}) => {
     }, [] )
 
     return(
-       <>
-            <Grid container >
-                <Grid item xs={3} sx={{height:"98vh", backgroundColor:"rgba(0, 0, 0, 0.85)"}} >
-                    <MenuList>
-                        <MenuItem >
-                            <NavLink 
-                                className={"link"}
-                                aria-current={"Carga datos de profesor"}
-                                to={"/menu-administrador/cargaDatProf"} >
-                                    <Typography component="span" variant="h5" textAlign={"right"} >
-                                        Carga datos de profesor
-                                    </Typography>
-                            </NavLink>
-                        </MenuItem>
-                        <MenuItem >
-                            <NavLink
-                                className={"link"} 
-                                aria-current={"Carga datos de profesor"}
-                                to={"/menu-administrador/inciencias"} >
-                                    <Typography component="span" variant="h5" textAlign={"right"} >
-                                        Inciencias
-                                    </Typography>
-                            </NavLink>
-                        </MenuItem>
-                        <MenuItem >
-                            <NavLink
-                                className={"sidebar"} 
-                                aria-current={"Parametros"}
-                                to={"/menu-administrador/parametros"} >
-                                    <Typography component="span" variant="h5" textAlign={"right"} >
-                                        Parametros
-                                    </Typography>
-                            </NavLink>
-                        </MenuItem>
-                        <MenuItem >
-                            <NavLink
-                                className={"link"} 
-                                aria-current={"Dias Economicos"}
-                                to={"/menu-administrador/incidenciasEconomicos"} >
-                                    <Typography component="span" variant="h5" textAlign={"right"} >
-                                        Dias Economicos
-                                    </Typography>
-                            </NavLink>
-                        </MenuItem>
-                    </MenuList>
-                    <Logout/>
-                </Grid>
-                <Grid item xs={9} >
-                    <Simples obj={alertaSimple} />
-                    <Grid item xs={12} >
-                        <Cargando bool={espera} />
-                        <Card sx={estilosCard}>
-                            <Typography component={"p"} variant='h4' sx={{textAlign:"center"}}>
-                                Conteo de memos
-                            </Typography>
-                            <CardContent>
-                                <Grid container>
-                                    <Grid item xs={12}>
-                                        <TextField
-                                            id="contadorId"
+        <Grid container >
+            <Grid item xs={3} sx={{height:"98vh", backgroundColor:"rgba(0, 0, 0, 0.85)"}} >
+                <NavarAdmin nav={2} />
+            </Grid>
+            <Grid item xs={9} >
+                <Grid item xs={12} >
+                    <Cargando bool={espera} />
+                    <Card sx={estilosCard}>
+                        <Typography component={"p"} variant='h4' sx={{textAlign:"center"}}>
+                            Conteo de memos
+                        </Typography>
+                        <CardContent>
+                            <Grid container>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        id="contadorId"
+                                        sx={EstiloTimePicker}
+                                        multiline
+                                        variant="filled"
+                                        placeholder="Cambiar conteo de memos"
+                                        onKeyDown={ (e) => { prevenirLetras(e) }}
+                                        onChange={ (e) => cambiarContadorMemo(e) }
+                                        />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Button variant="contained" 
+                                        color="success"
+                                        onClick={ (e) => { setContadorMemos(e) } } >
+                                        Cambiar conteo
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                    </Card>
+                    <Card sx={estilosCard}>
+                        <Typography component={"p"} variant='h4' sx={{textAlign:"center"}}>
+                            Cambiar fecha inicio y fin de quincena
+                        </Typography>
+                        <CardContent>
+                            <Grid container>
+                                <Grid item xs={6}>
+                                    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb" >
+                                        <DemoContainer components={['DatePicker']}>
+                                            <DatePicker
+                                            onChange={(event) => { cambiarFechaIni(event) }} 
                                             sx={EstiloTimePicker}
-                                            multiline
-                                            variant="filled"
-                                            placeholder="Cambiar conteo de memos"
-                                            onKeyDown={ (e) => { prevenirLetras(e) }}
-                                            onChange={ (e) => cambiarContadorMemo(e) }
-                                            />
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <Button variant="contained" 
-                                            color="success"
-                                            onClick={ (e) => { setContadorMemos(e) } } >
-                                            Cambiar conteo
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-                            </CardContent>
-                        </Card>
-                        <Card sx={estilosCard}>
-                            <Typography component={"p"} variant='h4' sx={{textAlign:"center"}}>
-                                Cambiar fecha inicio y fin de quincena
-                            </Typography>
-                            <CardContent>
-                                <Grid container>
-                                    <Grid item xs={6}>
-                                        <LocalizationProvider dateAdapter={AdapterDayjs} >
-                                            <DemoContainer components={['DatePicker']}>
-                                                <DatePicker
-                                                onChange={(event) => { cambiarFechaIni(event) }} 
-                                                sx={EstiloTimePicker}
 
-                                                label="Fecha inicio quicena"
-                                                value={inicio} />
-                                            </DemoContainer>
-                                        </LocalizationProvider>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <LocalizationProvider dateAdapter={AdapterDayjs} >
-                                            <DemoContainer components={['DatePicker']}>
-                                                <DatePicker
-                                                onChange={(event) => { cambiarFechaFin(event) }} 
-                                                sx={EstiloTimePicker}
-                                                
-                                                label="Fecha fin quncena"
-                                                value={fin} />
-                                            </DemoContainer>
-                                        </LocalizationProvider>
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <Button variant="contained" 
-                                            color="success"
-                                            onClick={ (e) => { setQuincena(e) } } >
-                                            Cambiar fechas
-                                        </Button>
-                                    </Grid>
+                                            label="Fecha inicio quicena"
+                                            value={inicio} />
+                                        </DemoContainer>
+                                    </LocalizationProvider>
                                 </Grid>
-                            </CardContent>
-                        </Card>
-                    </Grid>
+                                <Grid item xs={6}>
+                                    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb" >
+                                        <DemoContainer components={['DatePicker']}>
+                                            <DatePicker
+                                            onChange={(event) => { cambiarFechaFin(event) }} 
+                                            sx={EstiloTimePicker}
+                                            
+                                            label="Fecha fin quncena"
+                                            value={fin} />
+                                        </DemoContainer>
+                                    </LocalizationProvider>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Button variant="contained" 
+                                        color="success"
+                                        onClick={ (e) => { setQuincena(e) } } >
+                                        Cambiar fechas
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                    </Card>
                 </Grid>
             </Grid>
-       </>
+        </Grid>
     )
 };
 

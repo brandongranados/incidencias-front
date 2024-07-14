@@ -11,7 +11,13 @@ import Parametros from "./Parametros";
 import IncidenciasEconomico from "./IncidenciasEconomico";
 import DatosProfesor from "./DatosProfesor";
 import Inciencias from "./Incidencias";
-import MenuUsuario from "./MenuUsuario";
+import ReposicionAbierta from "./ReposicionAbierta";
+import Reposicion from "./Reposicion";
+import Corrimiento from "./Corrimiento";
+import DiaEconomico from "./DiaEconomico";
+import Horario from "./Horario";
+import CorrimientoAbierto from "./CorrimientoAbierto";
+import DiaEconomicoAbierto from "./DiaEconomicoAbierto";
 
 let Inicio = () => {
     const despacha = useDispatch();
@@ -23,11 +29,19 @@ let Inicio = () => {
     return(
         <Routes>
             <Route path="/" element={<Login />} />
+            
             <Route path="/menu-administrador/cargaDatProf" element={<DatosProfesor/>} />
             <Route path="/menu-administrador/inciencias" element={<Inciencias />} />
             <Route path="/menu-administrador/parametros" element={<Parametros />}/>
             <Route path="/menu-administrador/incidenciasEconomicos" element={<IncidenciasEconomico />}/>
-            <Route path="/menu-usuario" element={<MenuUsuario />}/>
+            <Route path="/menu-administrador/reposicion" element={<ReposicionAbierta/>}/>
+            <Route path="/menu-administrador/corrimiento" element={<CorrimientoAbierto/>}/>
+            <Route path="/menu-administrador/economico" element={<DiaEconomicoAbierto/>}/>
+
+            <Route path="/menu-usuario/reposicion" element={<Reposicion />}/>
+            <Route path="/menu-usuario/corrimiento" element={<Corrimiento />}/>
+            <Route path="/menu-usuario/economico" element={<DiaEconomico />}/>
+            <Route path="/menu-usuario/horario" element={<Horario />}/>
         </Routes>
     )
 };

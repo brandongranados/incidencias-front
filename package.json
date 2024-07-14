@@ -25,6 +25,7 @@
     "bulma-helpers": "^0.4.3",
     "clsx": "^2.0.0",
     "crypto-js": "^4.2.0",
+    "date-fns": "^3.6.0",
     "dayjs": "^1.11.10",
     "material-design-icons": "^3.0.1",
     "pdf-viewer-reactjs": "^2.2.3",

@@ -5,10 +5,16 @@ import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import Modal from "@mui/material/Modal";
 import Typography  from "@mui/material/Typography";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import BorderColorIcon from '@mui/icons-material/BorderColor';
 
+import ModalCorrimiento from './ModalCorrimiento';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 import '../css/docs.css';
+import ModalReposicion from "./ModalReposicion";
+import ModalEconomico from "./ModalEconomico";
 
 let DocPdf = function({resp}){
     let estilosCartaPdf = {
@@ -17,13 +23,21 @@ let DocPdf = function({resp}){
         borderColor: "black"
     };
 
-    const [altura, setAltura] = useState();
-    const [modalAbrir, setModalAbrir] = useState();
-    const [urlPDF, setUrlPDF] = useState();
+    const [altura, setAltura] = useState(0);
+    const [modalAbrir, setModalAbrir] = useState(false);
+    const [urlPDF, setUrlPDF] = useState("");
+    const [modCorr, setModCorr] = useState(false);
+    const [modRep, setModRep] = useState(false);
+    const [modEco, setModEco] = useState(false);
     
-    let closeModal = function () {
-        setModalAbrir(false);
-    };
+    let closeModal = () => setModalAbrir(false);
+    let cerrarCorr = () => setModCorr(false);
+    let cerrarRep = () => setModRep(false);
+    let cerrarEco = () => setModEco(false);
+
+    let abrirCorr = () => setModCorr(true);
+    let abrirRep = () => setModRep(true);
+    let abrirEco = () => setModEco(false);
 
     //FUNCIONES DE ACCION PDF EN MODAL
     let abrirPdf = function(){
@@ -45,13 +59,33 @@ let DocPdf = function({resp}){
                                 <div className="imgPdf">
                                     <i className="bi bi-file-pdf"
                                     onClick={ abrirPdf } />
+                                    <IconButton aria-label="editar" size="large">
+                                        <BorderColorIcon
+                                        onClick={ resp.tipo_num === 2 ? abrirEco : resp.tipo == "Corrimiento" ? abrirCorr : abrirRep }/>
+                                    </IconButton>
                                 </div>
                             </Grid>
                             {
                                 resp.tipo_num === 2 ?
                                     <>
                                         <Grid item xs={8} className="datos-pdf">
-                                            
+                                            <br/>
+                                            { resp.nombre }
+                                            <br/>
+                                            <strong>Tarjeta: </strong>
+                                            { resp.tarjeta }
+                                            <br/>
+                                            <strong>Fecha economico: </strong>
+                                            { resp.fecha_pertenece }
+                                            <br/>
+                                            <strong>Registrada el dia: </strong>
+                                            { resp.fecha_registro }
+                                            <br/>
+                                            <strong>Serie memo: </strong>
+                                            { resp.serie_memos }
+                                            <br/>
+                                            <strong>Correo contacto: </strong>
+                                            { resp.correo_electronico }
                                         </Grid>
                                     </>
                                 : 
@@ -59,6 +93,9 @@ let DocPdf = function({resp}){
                                         <Grid item xs={8} className="datos-pdf">
                                             <br/>
                                             { resp.nombre }
+                                            <br/>
+                                            <strong>Tarjeta: </strong>
+                                            { resp.tarjeta }
                                             <br/>
                                             <strong>Incidencia: </strong>
                                             { resp.fecha_incidencia }
@@ -105,6 +142,41 @@ let DocPdf = function({resp}){
                             title="visualizarPdf"
                             height={altura} />
                 </article>
+            </Modal>
+            <Modal
+            open={ resp.tipo == "Corrimiento" ? modCorr : modRep }>
+                <Box sx={{height:"100vh", 
+                            width:"100%", 
+                            display:"flex", 
+                            alignItems:"center", 
+                            justifyContent:"center"}}>
+                    <Box>
+                        {
+                            resp.tipo == "Corrimiento" ?
+                                <ModalCorrimiento 
+                                datos={resp}
+                                cerrarModal={ cerrarCorr } />
+                            :
+                                <ModalReposicion 
+                                datos={resp}
+                                cerrarModal={ cerrarRep } />
+                        }
+                    </Box>
+                </Box>
+            </Modal>
+            <Modal
+            open={ modEco }>
+                <Box sx={{height:"100vh", 
+                            width:"100%", 
+                            display:"flex", 
+                            alignItems:"center", 
+                            justifyContent:"center"}}>
+                    <Box>
+                        <ModalEconomico
+                        datos={resp}
+                        cerrarModal={ cerrarEco } />
+                    </Box>
+                </Box>
             </Modal>
         </>
     );

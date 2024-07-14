@@ -3,37 +3,29 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import TextField from "@mui/material/TextField";
 import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 import Grid from "@mui/material/Grid";
 import 'dayjs/locale/en-gb';
 
-let FechaHoraReposicion = ({setFecha, setHoraInicio, setHoraFinal, indice, activa}) => {
+let FechaHoraReposicionAbierta = ({setFecha, setHoraInicio, setHoraFinal, setHorasCubre, horaCubre, indice}) => {
     const EstiloTimePicker = {
         width: '98%!important',
     };
 
-    let deshabilitarFinesSem = (dia) => {
-        let dayOfWeek = dia["$d"].getDay();
-        if( activa )
-            return dayOfWeek === 0 || dayOfWeek === 6;
-        else
-            return ;
-    };
-
     return(
         <>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
                 <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb" >
                     <DemoContainer components={['DatePicker', 'TimePicker']}>
                         <DatePicker 
                             sx={EstiloTimePicker} 
                             label="Fecha incidencia"
-                            onChange={(event) => setFecha(event, indice)}
-                            shouldDisableDate={deshabilitarFinesSem} />
+                            onChange={(event) => setFecha(event, indice)} />
                     </DemoContainer>
                 </LocalizationProvider>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
                 <LocalizationProvider dateAdapter={AdapterDayjs} >
                     <DemoContainer components={['DatePicker', 'TimePicker']}>
                         <TimePicker
@@ -50,7 +42,7 @@ let FechaHoraReposicion = ({setFecha, setHoraInicio, setHoraFinal, indice, activ
                     </DemoContainer>
                 </LocalizationProvider>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
                 <LocalizationProvider dateAdapter={AdapterDayjs} >
                     <DemoContainer components={['DatePicker', 'TimePicker']}>
                         <TimePicker
@@ -67,8 +59,17 @@ let FechaHoraReposicion = ({setFecha, setHoraInicio, setHoraFinal, indice, activ
                     </DemoContainer>
                 </LocalizationProvider>
             </Grid>
+            <Grid item xs={3}>
+                <TextField
+                onChange={ (event) => setHorasCubre(event, indice) }
+                className='elemetsFormulario'
+                multiline
+                variant="filled"
+                label="Horas cubre"
+                placeholder="Horas cubre" />
+            </Grid>
         </>
     );
 };
 
-export default FechaHoraReposicion;
+export default FechaHoraReposicionAbierta;

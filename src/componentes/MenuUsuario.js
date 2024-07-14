@@ -18,7 +18,6 @@ import Reposicion from "./Reposicion";
 import Corrimiento from "./Corrimiento";
 import DiaEconomico from "./DiaEconomico";
 import Horario from "./Horario";
-import { Simples } from "./Alertas";
 
 import '../css/menuusuario.css';
 import AgregarDatosFaltan from "./AgregarDatosFaltan";
@@ -49,25 +48,25 @@ let MenuUsuario = function (){
                     icono: 0
                 });
 
-    let cambiarMsm = (obj) => {
+    /*let cambiarMsm = (obj) => {
         setAlertaSimple(obj);
-    };
+    };*/
 
-    const [tipoInc, setTipoInc] =  useState(<Reposicion cambiarMsm={cambiarMsm} />);
+    const [tipoInc, setTipoInc] =  useState(<Reposicion />);
 
     let cambiarPagina = (num) => {
         switch(num)
         {
             case 1:
-                setTipoInc(<Reposicion cambiarMsm={cambiarMsm} />);
+                setTipoInc(<Reposicion />);
                 setEstiloNavar([true, false, false, false]);
                 break;
             case 2:
-                setTipoInc(<Corrimiento cambiarMsm={cambiarMsm} />);
+                setTipoInc(<Corrimiento />);
                 setEstiloNavar([false, true, false, false]);
                 break;
             case 3:
-                setTipoInc(<DiaEconomico cambiarMsm={cambiarMsm} />);
+                setTipoInc(<DiaEconomico />);
                 setEstiloNavar([false, false, true, false]);
                 break;
             case 4:
@@ -131,7 +130,6 @@ let MenuUsuario = function (){
                     <Logout/>
                 </Grid>
                 <Grid item xs={9} sx={{maxHeight:"98vh", overflow:"scroll"}}>
-                    <Simples obj={alertaSimple} />
                     <Card sx={estilosCard}>
                         <Typography component={"p"} variant='h4' sx={{textAlign:"center"}}>
                             Datos profesor

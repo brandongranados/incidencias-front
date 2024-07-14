@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -20,12 +19,12 @@ import SendIcon from '@mui/icons-material/Send';
 
 import ajax from "../ConfigAxios";
 import urlAjax from '../propiedades.json';
-import FechaHoraReposicion from './FechaHoraReposicion';
-import { recargarDatos } from "./reducerAutenticacion/UsuarioSlice";
 
 import Cargando from "./Cargando";
 import { Alertas } from "./Alertas";
-import NavarUsuario from "./NavarUsuario";
+
+import '../css/sidebar.css';
+import dayjs from "dayjs";
 
 /**
  * DATOS DE INCIDENCIA 1
@@ -33,7 +32,7 @@ import NavarUsuario from "./NavarUsuario";
  * 
 */
 
-let Reposicion = () => {
+let ModalReposicion = ({datos, cerrarModal}) => {
     const estilosCard = {
         backgroundColor: "rgba(255, 255, 255, 0.706)",
         borderStyle: "solid",
@@ -44,7 +43,6 @@ let Reposicion = () => {
     const EstiloTimePicker = {
         width: '98%!important',
     };
-
     //CREAR COMPONENTE DE ALERTAS
     const alertasComponent = Alertas();
 
@@ -57,23 +55,13 @@ let Reposicion = () => {
     const [fechaCom, setFechaCom] = useState([]);
     const [horaChecIniCom, setHoraChecIniCom] = useState([]);
     const [horaChecFinCom, setHoraChecFinCom] = useState([]);
+    const [horaCubre, setHoraCubre] = useState([]);
     //CAMPOS DE DATOS DE INCIDENCIA
     const [valorObserv, setValorObserv] = useState("");
     const [fechaInc, setFechaInc] = useState("");
     const [horaChecIni, setHoraChecIni] = useState(null);
     const [horaChecFin, setHoraChecFin] = useState(null);
-    //BASIFICADO
-    const [basificado, setBasificado] = useState(0);
 
-    //DATOS USUARIO
-    const usuario = useSelector( state => state.usuario.nombreUsuario );
-    const despacha = useDispatch();
-    const [tarjetaCic, setTarjetaCic] = useState("");
-
-    let deshabilitarFinesSem = (dia) => {
-        let dayOfWeek = dia["$d"].getDay();
-        return dayOfWeek === 0 || dayOfWeek === 6;
-    };
     let agregarCompensacion = () => {
         setCompesarDin([ ...compesarDin, { index:compesarDin.length+1 } ]);
         setFechaCom([...fechaCom, {index: compesarDin.length+1, fecha: "", bool:false}]);
@@ -161,45 +149,6 @@ let Reposicion = () => {
         else
             setHoraChecFin(hora+":"+min+":"+seg);
     };
-    let validacion = () => {
-        let bool = true;
-
-        if( fechaCom.length == 0 || horaChecIniCom.length == 0 || horaChecFinCom.length == 0 )
-            return false;
-
-        try{
-            let fechaComBool = fechaCom.find( (iterador) => !iterador.bool );
-            let horaChecIniComBool = horaChecIniCom.find( (iterador) => !iterador.bool );
-            let horaChecFinComBool = horaChecFinCom.find( (iterador) => !iterador.bool );
-
-            if( fechaInc.length == 0 )
-                bool = false;
-            if( basificado != 1 )
-            {
-                if( horaChecIni == null )
-                    bool = false;
-                if( horaChecFin == null )
-                    bool = false;
-            }
-            if( valorObserv.length == 0 )
-                bool = false;
-            if( Array.isArray(fechaComBool) )
-                if( fechaComBool.length > 0 )
-                    bool = false;
-            if( Array.isArray(horaChecIniComBool) )
-                if( horaChecIniComBool.length > 0 )
-                    bool = false;
-            if( Array.isArray(horaChecFinComBool) )
-                if( horaChecFinComBool.length > 0 )
-                    bool = false;
-
-        }catch(error){
-            bool = false;
-        }
-
-        return bool;
-
-    };
     let tratameintoError = async (respuesta) => {
         await alertasComponent.crearModalAlerta({
             titulo: "Error",
@@ -213,36 +162,40 @@ let Reposicion = () => {
             colorConfirmar: "#d32f2f"
         });
     };
+    let setHorasCubre = (e, index) => {
+
+        let numero = e.target.value;
+        let izq = horaCubre.filter( iterador => iterador.index < index );
+        let der = horaCubre.filter( iterador => iterador.index > index );
+
+        if( index == null )
+            return;
+
+        for(let i=0; i<numero.length; i++)
+            if( !(numero.charAt(i).charCodeAt() > 47 && numero.charAt(i).charCodeAt() < 58) )
+                numero = numero.replace(numero.charAt(i), "");
+
+        setHoraCubre([ ...izq, { index:index, numero: numero }, ...der ]);
+    };
     let peticion = async (e) => {
         let array = [];
         let alertaModal = null;
 
-        if( !validacion() )
-        {
-            e.preventDefault();
-            await alertasComponent.crearModalAlerta({
-                titulo: "Informativo",
-                leyenda: "Revisar que todos los campos estén llenos.",
-                icono: 3,
-                activaCancelacion: false,
-                TextoConfirmacion: "Ok",
-                textoCancelacion: "",
-                colorCancelar: "",
-                activa: true,
-                colorConfirmar: "#d32f2f"
-            });
-            return;
-        }
-
         for(let i=0; i<fechaCom.length; i++)
             array.push({ fecha: fechaCom[i].fecha, 
                             horaInicio: horaChecIniCom[i].horaIni, 
-                            horaFin: horaChecFinCom[i].horaFin  });
+                            horaFin: horaChecFinCom[i].horaFin,
+                            horaCubre: horaCubre[i].numero  });
 
         try {
-            let datos = { fechInc: fechaInc, horIniInc: horaChecIni,
-                            horFinInc: horaChecFin, obs: valorObserv,
-                            usuario: usuario, reposicion: array };
+            let data = { 
+                            fechInc: fechaInc, 
+                            horIniInc: horaChecIni,
+                            horFinInc: horaChecFin, 
+                            obs: valorObserv,
+                            reposicion: array,
+                            idIncidencia : datos.id_prof_incidencia
+                        };
 
             alertaModal = await alertasComponent.crearModalAlerta({
                 titulo: "Advertencia",
@@ -255,6 +208,7 @@ let Reposicion = () => {
                 activa: true,
                 colorConfirmar: "#2e7d32"
             });
+
             if( !alertaModal )
             {
                 e.preventDefault();
@@ -269,52 +223,112 @@ let Reposicion = () => {
                     activa: true,
                     colorConfirmar: "#2e7d32"
                 });
+                cerrarModal();
                 return;
             }
             setEspera(true);
 
-            await ajax.post(urlAjax.REPOSICION, datos, 
+            await ajax.post(urlAjax.REPOSICION_ABIERTA_ACTUALIZA, data, 
                 {headers: {
                     'Content-Type': 'application/json',
                     'Authorization': sessionStorage.getItem("Authorization")
                   }});
+
             setEspera(false);
+            
             await alertasComponent.crearModalAlerta({
                 titulo: "Ok",
-                leyenda: "La incidencia fue enviada en espera de autorización. Se le enviará correo electrónico con el estatus de su incidencia.",
-                icono: 1,
+                leyenda: "Incidencia actualizada.",
+                icono: 2,
                 activaCancelacion: false,
-                TextoConfirmacion: "Ok",
+                TextoConfirmacion: "Cerrar",
                 textoCancelacion: "",
                 colorCancelar: "",
                 activa: true,
-                colorConfirmar: "#2e7d32"
+                colorConfirmar: "#d32f2f"
             });
+
+            window.location.reload();
         } catch (e) {
             setEspera(false);
             await tratameintoError(e.response.data);
         }
     };
+    let petcion2 = async (id) => {
+
+        let data = [];
+
+        try {
+            let datos = { id: id };
+
+            setEspera(true);
+
+            let res = await ajax.post(urlAjax.VISULIZAR_MEMOS_INC_COMP, datos, 
+                {headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': sessionStorage.getItem("Authorization")
+                  }});
+
+            data = await res.data;
+
+            setEspera(false);
+
+        } catch (e) {
+            setEspera(false);
+        }
+
+        return data;
+    };
 
     useEffect( () => {
-        let dat = JSON.parse(sessionStorage.getItem("datosProf"));
-        despacha( recargarDatos() );
-        setTarjetaCic(dat[0].tarjetaCic);
-        setBasificado(dat[0].basificado);
+        let compensacion = null;
+
+        setFechaInc(datos.fecha_incidencia);
+        setHoraChecIni(datos.hora_ini_incidencia);
+        setHoraChecFin(datos.hora_fin_incidencia);
+        setValorObserv(datos.observaciones);
+        
+        let devuelta = async () => {
+            let i = 0;
+            let din = [];
+            let ini = [];
+            let fin = [];
+            let fech = [];
+            let horas = [];
+
+            compensacion = await petcion2(datos.id_prof_incidencia);
+
+            compensacion.forEach( iterador => {
+
+                din = [ ...din, { index:i } ];
+                fech = [...fech, {index: i, fecha: iterador.fecha_compensacion, bool:true}];
+                ini = [...ini, {index: i, horaIni: iterador.hora_ini_compensacion, bool:true}];
+                fin = [...fin, {index: i, horaFin: iterador.hora_fin_compensacion, bool:true}];
+                horas = [ ...horas, { index: i, numero: iterador.horas_cubre} ];
+                i+=1;
+
+                if( din.length == compensacion.length )
+                {
+                    setCompesarDin(din);
+                    setFechaCom(fech);
+                    setHoraChecIniCom(ini);
+                    setHoraChecFinCom(fin);
+                    setHoraCubre(horas);
+                }
+            });
+        };
+        devuelta();
+
     }, [] );
 
     return(
-        <Grid container>
-            <Grid item xs={3} 
-                sx={{height:"98vh", backgroundColor:"rgba(0, 0, 0, 0.85)"}} >
-                <NavarUsuario nav={1} />
-            </Grid>
-            <Grid item xs={9} sx={{maxHeight:"98vh", overflow:"scroll"}}>
+        <Grid container sx={{overflow:"hidden", backgroundColor:"#ffffffc9"}}>
+            <Grid item xs={12} sx={{maxHeight:"98vh", overflow:"scroll"}} >
                 <Cargando bool={espera} />
                 <Card sx={estilosCard}>
                     <CardContent>
                         <Typography component={"p"} variant='h4' sx={{textAlign:"center"}}>
-                            Datos de la incidencia
+                            Datos de la reposici&oacute;n
                         </Typography>
                             <Grid container>
                                 <Grid item xs={3}>
@@ -324,7 +338,7 @@ let Reposicion = () => {
                                         <DemoContainer components={['DatePicker', 'TimePicker']}>
                                             <DatePicker sx={EstiloTimePicker} label="Fecha incidencia" 
                                                 onChange={(event) => setFecha(event, null)}
-                                                shouldDisableDate={deshabilitarFinesSem} />
+                                                value={dayjs(fechaInc)} />
                                         </DemoContainer>
                                     </LocalizationProvider>
                                 </Grid>
@@ -336,6 +350,7 @@ let Reposicion = () => {
                                             sx={EstiloTimePicker}
                                             label="Hora checada inicio" 
                                             ampm={false}
+                                            value={dayjs("1970-01-01T"+horaChecIni)}
                                             viewRenderers={{
                                                 hours: renderTimeViewClock,
                                                 minutes: renderTimeViewClock,
@@ -353,6 +368,7 @@ let Reposicion = () => {
                                             sx={EstiloTimePicker}
                                             label="Hora checada fin"
                                             ampm={false}
+                                            value={dayjs("1970-01-01T"+horaChecFin)}
                                             viewRenderers={{
                                                 hours: renderTimeViewClock,
                                                 minutes: renderTimeViewClock,
@@ -394,18 +410,68 @@ let Reposicion = () => {
                                 <i className="bi bi-x-lg"></i>
                             </Button>
                         </Box>
-                        <Grid container>
                             {
                                 compesarDin.map( (iterador) => (
-                                    <FechaHoraReposicion index={iterador.index}
-                                    setFecha={setFecha}
-                                    setHoraInicio={setHoraInicio}
-                                    setHoraFinal={setHoraFinal}
-                                    indice={iterador.index}
-                                    activa={true} />
+                                    <Grid container index={iterador.index}>
+                                        <Grid item xs={3}>
+                                            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb" >
+                                                <DemoContainer components={['DatePicker', 'TimePicker']}>
+                                                    <DatePicker 
+                                                        sx={EstiloTimePicker} 
+                                                        label="Fecha incidencia"
+                                                        onChange={(event) => setFecha(event, iterador.index)}
+                                                        value={dayjs(fechaCom[iterador.index].fecha)} />
+                                                </DemoContainer>
+                                            </LocalizationProvider>
+                                        </Grid>
+                                        <Grid item xs={3}>
+                                            <LocalizationProvider dateAdapter={AdapterDayjs} >
+                                                <DemoContainer components={['DatePicker', 'TimePicker']}>
+                                                    <TimePicker
+                                                    onChange={(event) => setHoraInicio(event, iterador.index)}
+                                                    sx={EstiloTimePicker}
+                                                    label="Hora checada inicio"
+                                                    ampm={false}
+                                                    viewRenderers={{
+                                                        hours: renderTimeViewClock,
+                                                        minutes: renderTimeViewClock,
+                                                        seconds: renderTimeViewClock,
+                                                        }}
+                                                    value={dayjs("1970-01-01T"+horaChecIniCom[iterador.index].horaIni)}
+                                                    />
+                                                </DemoContainer>
+                                            </LocalizationProvider>
+                                        </Grid>
+                                        <Grid item xs={3}>
+                                            <LocalizationProvider dateAdapter={AdapterDayjs} >
+                                                <DemoContainer components={['DatePicker', 'TimePicker']}>
+                                                    <TimePicker
+                                                    onChange={(event) => setHoraFinal(event, iterador.index)}
+                                                    sx={EstiloTimePicker}
+                                                    label="Hora checada fin"
+                                                    ampm={false}
+                                                    viewRenderers={{
+                                                        hours: renderTimeViewClock,
+                                                        minutes: renderTimeViewClock,
+                                                        seconds: renderTimeViewClock,
+                                                        }}
+                                                        value={dayjs("1970-01-01T"+horaChecFinCom[iterador.index].horaFin)}
+                                                    />
+                                                </DemoContainer>
+                                            </LocalizationProvider>
+                                        </Grid>
+                                        <Grid item xs={3}>
+                                            <TextField
+                                            onChange={ (event) => setHorasCubre(event, iterador.index) }
+                                            className='elemetsFormulario'
+                                            multiline
+                                            variant="filled"
+                                            label="Horas cubre"
+                                            value={horaCubre[iterador.index].numero} />
+                                        </Grid>
+                                    </Grid>
                                 ) )
                             }
-                        </Grid>
                     </CardContent>
                 </Card>
                 <Card sx={estilosCard}>
@@ -416,7 +482,12 @@ let Reposicion = () => {
                             color="success" 
                             startIcon={<SendIcon/>}
                             onClick={ (event) =>{ peticion(event) } }    >
-                                Enviar incidencia
+                                Actualizar incidencia
+                            </Button>
+                            <Button variant="contained"
+                            color="error"
+                            onClick={ cerrarModal }    >
+                                Cerrar
                             </Button>
                         </Grid>
                     </CardContent>
@@ -426,4 +497,4 @@ let Reposicion = () => {
     )
 };
 
-export default Reposicion;
+export default ModalReposicion;
