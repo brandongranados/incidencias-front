@@ -273,11 +273,7 @@ let Reposicion = () => {
             }
             setEspera(true);
 
-            await ajax.post(urlAjax.REPOSICION, datos, 
-                {headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': sessionStorage.getItem("Authorization")
-                  }});
+            await ajax.post(urlAjax.REPOSICION, datos);
             setEspera(false);
             await alertasComponent.crearModalAlerta({
                 titulo: "Ok",

@@ -127,11 +127,7 @@ let DatosProfesor = function(){
                 nombre: nomArch 
             };
 
-            await ajax.post(urlAjax.EXCEL_PROF, datos, 
-                {headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': sessionStorage.getItem("Authorization")
-                    }});
+            await ajax.post(urlAjax.EXCEL_PROF, datos);
 
             await alertasComponent.crearModalAlerta({
                 titulo: "Ok",

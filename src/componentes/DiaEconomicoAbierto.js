@@ -1,7 +1,3 @@
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Grid";
@@ -18,6 +14,7 @@ import { Alertas } from "./Alertas";
 
 import { useState } from 'react';
 import NavarAdmin from './NavarAdmin';
+import { Box } from "@mui/material";
 
 let DiaEconomicoAbierto = () => {
 
@@ -44,27 +41,9 @@ let DiaEconomicoAbierto = () => {
         const [espera, setEspera] =useState(false);
 
         let cambiarTarjeta = (e) => setTarjetaCic(e.target.value);
+        let setFechaInicio = (e) => setFechaIni(e.target.value.length == 0 ? null : e.target.value);
+        let setFechaFinal = (e) => setFechaFin(e.target.value.length == 0 ? null : e.target.value);
 
-        let setFechaInicio = (e) => {
-            let ano = (e["$d"].getFullYear())+"";
-            let mes = (e["$d"].getMonth()+1)+"";
-            let dia = (e["$d"].getDate())+"";
-    
-            mes = mes.length <= 1 ? "0"+mes : mes;
-            dia = dia.length <= 1 ? "0"+dia : dia;
-    
-            setFechaIni(ano+"-"+mes+"-"+dia);
-        };
-        let setFechaFinal = (e) => {
-            let ano = (e["$d"].getFullYear())+"";
-            let mes = (e["$d"].getMonth()+1)+"";
-            let dia = (e["$d"].getDate())+"";
-    
-            mes = mes.length <= 1 ? "0"+mes : mes;
-            dia = dia.length <= 1 ? "0"+dia : dia;
-    
-            setFechaFin(ano+"-"+mes+"-"+dia);
-        };
         let validacion = () => {
             let bool = true;
     
@@ -82,6 +61,7 @@ let DiaEconomicoAbierto = () => {
             return bool;
     
         };
+        
         let peticion = async (e) => {
             let alertaModal = null;
     
@@ -136,11 +116,7 @@ let DiaEconomicoAbierto = () => {
                 }
                 setEspera(true);
     
-                await ajax.post(urlAjax.DIAECONOMICO_ABIERTA, datos, 
-                    {headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': sessionStorage.getItem("Authorization")
-                      }});
+                await ajax.post(urlAjax.DIAECONOMICO_ABIERTA, datos);
                 setEspera(false);
                 await alertasComponent.crearModalAlerta({
                     titulo: "Ok",
@@ -179,7 +155,7 @@ let DiaEconomicoAbierto = () => {
                 <Cargando bool={espera} />
                 <Card sx={estilosCard}>
                         <Typography component={"p"} variant='h4' sx={{textAlign:"center"}}>
-                            Ingrese la tarjeta cic del profesor para crear su reposici&oacute;n de horario
+                            Ingrese la tarjeta cic del profesor para crear su d&iacute;a econ&oacute;mico
                         </Typography>
                         <CardContent>
                             <Grid container>
@@ -188,8 +164,8 @@ let DiaEconomicoAbierto = () => {
                                         sx={EstiloTimePicker}
                                         multiline
                                         variant="filled"
-                                        label="Numero de tarjeta cic"
-                                        placeholder="Numero de tarjeta cic"
+                                        label="Número de tarjeta cic"
+                                        placeholder="Número de tarjeta cic"
                                         value={tarjetaCic}
                                         onChange={ e  => cambiarTarjeta(e) }
                                         />
@@ -204,24 +180,26 @@ let DiaEconomicoAbierto = () => {
                         </Typography>
                         <Grid container>
                             <Grid item xs={6}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb" >
-                                    <DemoContainer components={['DatePicker', 'TimePicker']}>
-                                        <DatePicker
-                                        onChange={(event) => { setFechaInicio(event) }} 
-                                        sx={EstiloTimePicker}
-                                        label="Fecha inicio" />
-                                    </DemoContainer>
-                                </LocalizationProvider>
+                                <Box sx={{pr:1}}>
+                                    <TextField
+                                    sx={{width: 1}}
+                                    type="date"
+                                    placeholder="Fecha inicio"
+                                    onChange={(event) => { setFechaInicio(event) }}
+                                    value={fechaIni}
+                                    />
+                                </Box>
                             </Grid>
                             <Grid item xs={6}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb" >
-                                    <DemoContainer components={['DatePicker', 'TimePicker']}>
-                                        <DatePicker
-                                        onChange={(event) => { setFechaFinal(event) }} 
-                                        sx={EstiloTimePicker}
-                                        label="Fecha fin" />
-                                    </DemoContainer>
-                                </LocalizationProvider>
+                                <Box sx={{pr:1}}>
+                                    <TextField
+                                    sx={{width: 1}}
+                                    type="date"
+                                    placeholder="Fecha fin"
+                                    onChange={(event) => { setFechaFinal(event) }}
+                                    value={fechaFin}
+                                    />
+                                </Box>
                             </Grid>
                         </Grid>
                     </CardContent>

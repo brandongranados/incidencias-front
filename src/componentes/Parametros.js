@@ -83,11 +83,7 @@ let Parametros = ({pag}) => {
 
             setEspera(true);
 
-            await ajax.post( urlAjax.CAMBIAR_CONTADOR, datos, 
-                {headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': sessionStorage.getItem("Authorization")
-                  }} );
+            await ajax.post( urlAjax.CAMBIAR_CONTADOR, datos);
             
             setEspera(false);
             
@@ -158,11 +154,7 @@ let Parametros = ({pag}) => {
 
             setEspera(true);
 
-            await ajax.post( urlAjax.SET_QUINCENA, datos, 
-                {headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': sessionStorage.getItem("Authorization")
-                  }} );
+            await ajax.post( urlAjax.SET_QUINCENA, datos);
             
             setEspera(false);
             
@@ -196,11 +188,7 @@ let Parametros = ({pag}) => {
 
     let getParametros = async () => {
         try {
-            let pet = await ajax.post(urlAjax.GET_PARAMETROS, {}, 
-                {headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': sessionStorage.getItem("Authorization")
-                  }});
+            let pet = await ajax.post(urlAjax.GET_PARAMETROS);
             let datos = pet.data;
 
             setContador(datos.incremento);

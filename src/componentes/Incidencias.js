@@ -1,16 +1,7 @@
 import { useEffect, useState } from "react";
 
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-
-import dayjs from 'dayjs';
-import 'dayjs/locale/en-gb';
-
 import AppBar from "@material-ui/core/AppBar";
 import Grid from "@material-ui/core/Grid";
-import Toolbar from "@material-ui/core/Toolbar";
 import Pagination from '@mui/material/Pagination';
 import Box from "@mui/material/Box";
 
@@ -19,29 +10,10 @@ import Search from "./Search";
 import ajax from "../ConfigAxios";
 import urlAjax from '../propiedades.json';
 import Cargando from './Cargando';
-import { Alertas } from "./Alertas";
 import NavarAdmin from './NavarAdmin';
+import { TextField } from "@mui/material";
 
 let Inciencias = function(){
-    
-    const [alertaSimple, setAlertaSimple] = 
-        useState({
-                    msm: "",
-                    activa: false,
-                    icono: 0
-                });
-
-    let crearCadenaFecha = (obj) => {
-        let ano = (obj.getFullYear())+"";
-        let mes = (obj.getMonth()+1)+"";
-        let dia = (obj.getDate())+"";
-
-        mes = mes.length <= 1 ? "0"+mes : mes;
-        dia = dia.length <= 1 ? "0"+dia : dia;
-
-        return ano+"-"+mes+"-"+dia;
-    };
-
     //ESTILOS
     const barraja = {
         backgroundColor: "#1976d2c6",
@@ -66,11 +38,7 @@ let Inciencias = function(){
         setEspera(true);
 
         try {
-            let pet = await ajax.post(urlAjax.VISULIZAR_MEMOS_INC, obj, 
-                {headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': sessionStorage.getItem("Authorization")
-                  }});
+            let pet = await ajax.post(urlAjax.VISULIZAR_MEMOS_INC, obj);
 
             let datosResp = await pet.data;
 
@@ -123,14 +91,19 @@ let Inciencias = function(){
     };
 
     let cambiarFechaIni = async (e) => {
+        let ini = new Date(e.target.value).getTime();
+        let fin = new Date(fechaFin).getTime();
 
-        setFechaIni(crearCadenaFecha(e["$d"]));
+        if( e.target.value.length == 0 )
+            setFechaIni(null);
+        else
+            setFechaIni(e.target.value);
 
-        if( fechaFin == null  )
+        if( fechaFin == null || ini > fin )
             return;
 
         let datos = {    
-            fechaIni: crearCadenaFecha(e["$d"]), 
+            fechaIni: e.target.value, 
             fechaFin: fechaFin, 
             busqueda: busqueda,
             paginacion: paginaActual };
@@ -139,15 +112,20 @@ let Inciencias = function(){
     };
     
     let cambiarFechaFin = async (e) => {
+        let ini = new Date(fechaIni).getTime();
+        let fin = new Date(e.target.value).getTime();
 
-        setFechaFin(crearCadenaFecha(e["$d"]));
+        if( e.target.value.length == 0 )
+            setFechaFin(null);
+        else
+            setFechaFin(e.target.value);
 
-        if( fechaIni == null  )
+        if( fechaIni == null || ini > fin )
             return;
 
         let datos = {    
             fechaIni: fechaIni, 
-            fechaFin: crearCadenaFecha(e["$d"]), 
+            fechaFin: e.target.value, 
             busqueda: busqueda,
             paginacion: paginaActual };
 
@@ -175,34 +153,38 @@ let Inciencias = function(){
             <Grid item xs={9} >
                 <Cargando bool={espera} />
                 <AppBar position="static" style={barraja}>
-                    <Toolbar>
-                        <Box sx={{width:"50%", paddingRight:"1%"}}>
-                            <Search value={busqueda} 
+                    <Grid container>
+                        <Grid item xs={6}>
+                            <Box sx={{pr: 1}}>
+                                <Search value={busqueda}
                                 onChange={ (e) => { cambiarBusqueda(e) } } />
-                        </Box>
-                        <Box sx={{width:"50%", paddingLeft:"1%", display:"flex"}}>
-                            <Box sx={{width:"50%", paddingRight:"1%"}}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs} >
-                                    <DemoContainer components={['DatePicker']} >
-                                        <DatePicker label="Fecha inicio"
-                                            onChange={ (e) => { cambiarFechaIni(e) } }
-                                            value={dayjs(fechaIni)}
-                                            inputProps={{ readOnly: true }} />
-                                    </DemoContainer>
-                                </LocalizationProvider>
                             </Box>
-                            <Box sx={{width:"50%", paddingLeft:"1%"}}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs} >
-                                    <DemoContainer components={['DatePicker']}>
-                                        <DatePicker label="Fecha fin"
-                                        onChange={ (e) => { cambiarFechaFin(e) } }
-                                        value={dayjs(fechaFin)}
-                                        />
-                                    </DemoContainer>
-                                </LocalizationProvider>
-                            </Box>
-                        </Box>
-                    </Toolbar>
+                        </Grid>
+                        <Grid item xs={6} container>
+                            <Grid item xs={6}>
+                                <Box sx={{pr:1}}>
+                                    <TextField
+                                    sx={{marginTop:"6px", width: 1}}
+                                    type="date"
+                                    placeholder="Fecha inicio"
+                                    onChange={ (e) => { cambiarFechaIni(e) } }
+                                    value={fechaIni}
+                                    />
+                                </Box>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Box sx={{pr:1}}>
+                                    <TextField
+                                    sx={{marginTop:"6px", width: 1}}
+                                    type="date"
+                                    placeholder="Fecha fin"
+                                    onChange={ (e) => { cambiarFechaFin(e) } }
+                                    value={fechaFin}
+                                    />
+                                </Box>
+                            </Grid>
+                        </Grid>
+                    </Grid>
                 </AppBar>
                 <section className="listaDocsPdf">
                     <Grid item xs={12}>

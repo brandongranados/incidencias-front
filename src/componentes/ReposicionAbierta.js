@@ -1,13 +1,5 @@
 import { useState } from "react";
 
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
-import 'dayjs/locale/en-gb';
-
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Grid";
@@ -19,7 +11,6 @@ import SendIcon from '@mui/icons-material/Send';
 
 import ajax from "../ConfigAxios";
 import urlAjax from '../propiedades.json';
-import { useSelector } from "react-redux";
 
 import Cargando from "./Cargando";
 import { Alertas } from "./Alertas";
@@ -113,12 +104,6 @@ let ReposicionAbierta = () => {
         setHoraCubre([ ...izq, { index:index, numero: numero }, ...der ]);
     };
     let setFecha = (e, index) => {
-        let ano = (e["$d"].getFullYear())+"";
-        let mes = (e["$d"].getMonth()+1)+"";
-        let dia = (e["$d"].getDate())+"";
-
-        mes = mes.length <= 1 ? "0"+mes : mes;
-        dia = dia.length <= 1 ? "0"+dia : dia;
 
         if( index != null )
         {
@@ -126,19 +111,12 @@ let ReposicionAbierta = () => {
             let izq = fechaCom.filter( (iterador) => iterador.index < index );
             let der = fechaCom.filter( (iterador) => iterador.index > index );
 
-            setFechaCom([ ...izq, { index:busq.index, fecha: ano+"-"+mes+"-"+dia, bool:true }, ...der ]);
+            setFechaCom([ ...izq, { index:busq.index, fecha: e.target.value.length == 0 ? null : e.target.value, bool:true }, ...der ]);
         }
         else
-            setFechaInc(ano+"-"+mes+"-"+dia);
+            setFechaInc(e.target.value.length == 0 ? null : e.target.value);
     };
     let setHoraInicio = (e, index) => {
-        let hora = (e["$d"].getHours())+"";
-        let min = (e["$d"].getMinutes())+"";
-        let seg = (e["$d"].getSeconds())+"";
-
-        hora = hora.length <= 1 ? "0"+hora : hora;
-        min = min.length <= 1 ? "0"+min : min;
-        seg = seg.length <= 1 ? "0"+seg : seg;
 
         if( index != null )
         {
@@ -146,19 +124,12 @@ let ReposicionAbierta = () => {
             let izq = horaChecIniCom.filter( (iterador) => iterador.index < index );
             let der = horaChecIniCom.filter( (iterador) => iterador.index > index );
 
-            setHoraChecIniCom([ ...izq, { index:busq.index, horaIni: hora+":"+min+":"+seg, bool:true }, ...der ]);
+            setHoraChecIniCom([ ...izq, { index:busq.index, horaIni: e.target.value.length == 0 ? null : e.target.value, bool:true }, ...der ]);
         }
         else
-            setHoraChecIni(hora+":"+min+":"+seg);
+            setHoraChecIni(e.target.value.length == 0 ? null : e.target.value);
     };
     let setHoraFinal = (e, index) => {
-        let hora = (e["$d"].getHours())+"";
-        let min = (e["$d"].getMinutes())+"";
-        let seg = (e["$d"].getSeconds())+"";
-
-        hora = hora.length <= 1 ? "0"+hora : hora;
-        min = min.length <= 1 ? "0"+min : min;
-        seg = seg.length <= 1 ? "0"+seg : seg;
 
         if( index != null )
         {
@@ -166,10 +137,10 @@ let ReposicionAbierta = () => {
             let izq = horaChecFinCom.filter( (iterador) => iterador.index < index );
             let der = horaChecFinCom.filter( (iterador) => iterador.index > index );
 
-            setHoraChecFinCom([ ...izq, { index:busq.index, horaFin: hora+":"+min+":"+seg, bool:true }, ...der ]);
+            setHoraChecFinCom([ ...izq, { index:busq.index, horaFin: e.target.value.length == 0 ? null : e.target.value, bool:true }, ...der ]);
         }
         else
-            setHoraChecFin(hora+":"+min+":"+seg);
+            setHoraChecFin(e.target.value.length == 0 ? null : e.target.value);
     };
     let validacion = () => {
         let bool = true;
@@ -279,11 +250,7 @@ let ReposicionAbierta = () => {
             }
             setEspera(true);
 
-            await ajax.post(urlAjax.REPOSICION_ABIERTA, datos, 
-                {headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': sessionStorage.getItem("Authorization")
-                  }});
+            await ajax.post(urlAjax.REPOSICION_ABIERTA, datos);
 
             setEspera(false);
             
@@ -322,8 +289,8 @@ let ReposicionAbierta = () => {
                                         sx={EstiloTimePicker}
                                         multiline
                                         variant="filled"
-                                        label="Numero de tarjeta cic"
-                                        placeholder="Numero de tarjeta cic"
+                                        label="Número de tarjeta cic"
+                                        placeholder="Número de tarjeta cic"
                                         value={tarjetaCic}
                                         onChange={ e  => cambiarTarjeta(e) }
                                         />
@@ -338,58 +305,45 @@ let ReposicionAbierta = () => {
                         </Typography>
                             <Grid container>
                                 <Grid item xs={3}>
-                                    <LocalizationProvider 
-                                    dateAdapter={AdapterDayjs} 
-                                    adapterLocale="en-gb" >
-                                        <DemoContainer components={['DatePicker', 'TimePicker']}>
-                                            <DatePicker sx={EstiloTimePicker} label="Fecha incidencia" 
-                                                onChange={(event) => setFecha(event, null)} />
-                                        </DemoContainer>
-                                    </LocalizationProvider>
+                                    <Box sx={{pr:1}}>
+                                        <TextField
+                                        sx={{width: 1}}
+                                        type="date"
+                                        placeholder="Fecha incidencia"
+                                        onChange={(event) => setFecha(event, null)}
+                                        />
+                                    </Box>
                                 </Grid>
                                 <Grid item xs={3}>
-                                    <LocalizationProvider dateAdapter={AdapterDayjs} >
-                                        <DemoContainer components={['DatePicker', 'TimePicker']}>
-                                            <TimePicker
-                                            onChange={(event) => setHoraInicio(event, null)}
-                                            sx={EstiloTimePicker}
-                                            label="Hora checada inicio" 
-                                            ampm={false}
-                                            viewRenderers={{
-                                                hours: renderTimeViewClock,
-                                                minutes: renderTimeViewClock,
-                                                seconds: renderTimeViewClock,
-                                                }}
-                                            />
-                                        </DemoContainer>
-                                    </LocalizationProvider>
+                                    <Box sx={{pr:1}}>
+                                        <TextField
+                                        sx={{width: 1}}
+                                        type="time"
+                                        placeholder="Hora checada inicio"
+                                        onChange={(event) => setHoraInicio(event, null)}
+                                        />
+                                    </Box>  
                                 </Grid>
                                 <Grid item xs={3}>
-                                    <LocalizationProvider dateAdapter={AdapterDayjs} >
-                                        <DemoContainer components={['DatePicker', 'TimePicker']}>
-                                            <TimePicker
-                                            onChange={(event) => setHoraFinal(event, null)}
-                                            sx={EstiloTimePicker}
-                                            label="Hora checada fin"
-                                            ampm={false}
-                                            viewRenderers={{
-                                                hours: renderTimeViewClock,
-                                                minutes: renderTimeViewClock,
-                                                seconds: renderTimeViewClock,
-                                                }}
-                                            />
-                                        </DemoContainer>
-                                    </LocalizationProvider>
+                                    <Box sx={{pr:1}}>
+                                        <TextField
+                                        sx={{width: 1}}
+                                        type="time"
+                                        placeholder="Hora checada fin"
+                                        onChange={(event) => setHoraFinal(event, null)}
+                                        />
+                                    </Box>
                                 </Grid>
                                 <Grid item xs={3}>
-                                    <TextField
-                                    onChange={setObservaciones}
-                                    className='elemetsFormulario'
-                                    multiline
-                                    variant="filled"
-                                    label="Observaciones"
-                                    placeholder="Observaciones"
-                                    value={valorObserv} />
+                                    <Box sx={{pr:1}}>
+                                        <TextField
+                                        onChange={setObservaciones}
+                                        sx={{width:1}}
+                                        variant="filled"
+                                        label="Observaciones"
+                                        placeholder="Observaciones"
+                                        value={valorObserv} />
+                                    </Box>
                                 </Grid>
                             </Grid>
                     </CardContent>

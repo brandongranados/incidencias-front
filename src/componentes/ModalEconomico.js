@@ -143,11 +143,7 @@ let ModalEconomico = ({datos, cerrarModal}) => {
             }
             setEspera(true);
 
-            await ajax.post(urlAjax.DIAECONOMICO_ABIERTA, datos, 
-                {headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': sessionStorage.getItem("Authorization")
-                    }});
+            await ajax.post(urlAjax.DIAECONOMICO_ABIERTA, datos);
             setEspera(false);
             await alertasComponent.crearModalAlerta({
                 titulo: "Ok",

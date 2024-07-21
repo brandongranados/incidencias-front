@@ -1,11 +1,5 @@
 import { useState } from 'react';
 
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Grid";
@@ -13,15 +7,13 @@ import Typography from "@mui/material/Typography";
 import SendIcon from '@mui/icons-material/Send';
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import 'dayjs/locale/en-gb';
 
 import ajax from "../ConfigAxios";
 import urlAjax from '../propiedades.json';
 import Cargando from './Cargando';
 import { Alertas } from "./Alertas";
 import NavarAdmin from "./NavarAdmin";
-
-import { useSelector } from "react-redux";
+import { Box } from '@mui/material';
 
 let CorrimientoAbierto = () => {
     const estilosCard = {
@@ -38,9 +30,6 @@ let CorrimientoAbierto = () => {
     //CREAR COMPONENTE DE ALERTAS
     const alertasComponent = Alertas();
 
-    //DATOS USUARIO
-    const usuario = useSelector( state => state.usuario.nombreUsuario );
-
     //DATOS DE LA INCIDENCIA
     const [fechaInc, setFechaInc] = useState("");
     const [horaChecIni, setHoraChecIni] = useState("");
@@ -51,41 +40,9 @@ let CorrimientoAbierto = () => {
     const [espera, setEspera] =useState(false);
 
     let cambiarTarjeta = (e) => setTarjetaCic(e.target.value);
-    
-    let setFecha = (e) => {
-        let ano = (e["$d"].getFullYear())+"";
-        let mes = (e["$d"].getMonth()+1)+"";
-        let dia = (e["$d"].getDate())+"";
-
-        mes = mes.length <= 1 ? "0"+mes : mes;
-        dia = dia.length <= 1 ? "0"+dia : dia;
-
-        setFechaInc(ano+"-"+mes+"-"+dia);
-    };
-
-    let horaIni = (e) => {
-        let hora = (e["$d"].getHours())+"";
-        let min = (e["$d"].getMinutes())+"";
-        let seg = (e["$d"].getSeconds())+"";
-
-        hora = hora.length <= 1 ? "0"+hora : hora;
-        min = min.length <= 1 ? "0"+min : min;
-        seg = seg.length <= 1 ? "0"+seg : seg;
-
-        setHoraChecIni(hora+":"+min+":"+seg);
-    };
-
-    let horaFin = (e) => {
-        let hora = (e["$d"].getHours())+"";
-        let min = (e["$d"].getMinutes())+"";
-        let seg = (e["$d"].getSeconds())+"";
-
-        hora = hora.length <= 1 ? "0"+hora : hora;
-        min = min.length <= 1 ? "0"+min : min;
-        seg = seg.length <= 1 ? "0"+seg : seg;
-
-        setHoraChecFin(hora+":"+min+":"+seg);
-    };
+    let setFecha = (e) => setFechaInc(e.target.value.length == 0 ? null : e.target.value);
+    let horaIni = (e) => setHoraChecIni(e.target.value.length == 0 ? null : e.target.value);
+    let horaFin = (e) => setHoraChecFin(e.target.value.length == 0 ? null : e.target.value);
 
     let peticion = async (e) => {
         let alertaModal = null;
@@ -125,11 +82,7 @@ let CorrimientoAbierto = () => {
             }
             setEspera(true);
 
-            await ajax.post(urlAjax.CORRIMIENTO_ABIERTA, datos, 
-                {headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': sessionStorage.getItem("Authorization")
-                  }});
+            await ajax.post(urlAjax.CORRIMIENTO_ABIERTA, datos);
             setEspera(false);
 
             await alertasComponent.crearModalAlerta({
@@ -169,7 +122,7 @@ let CorrimientoAbierto = () => {
                 <Cargando bool={espera} />
                 <Card sx={estilosCard}>
                         <Typography component={"p"} variant='h4' sx={{textAlign:"center"}}>
-                            Ingrese la tarjeta cic del profesor para crear su reposici&oacute;n de horario
+                            Ingrese la tarjeta cic del profesor para crear su corrimiento de horario
                         </Typography>
                         <CardContent>
                             <Grid container>
@@ -194,48 +147,37 @@ let CorrimientoAbierto = () => {
                         </Typography>
                         <Grid container>
                             <Grid item xs={4}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb" >
-                                    <DemoContainer components={['DatePicker', 'TimePicker']}>
-                                        <DatePicker
-                                        onChange={(event) => { setFecha(event) }}
-                                        sx={EstiloTimePicker} 
-                                        label="Fecha incidencia" />
-                                    </DemoContainer>
-                                </LocalizationProvider>
+                                <Box sx={{pr:1}}>
+                                    <TextField
+                                    sx={{width: 1}}
+                                    type="date"
+                                    placeholder="Fecha incidencia"
+                                    onChange={(event) => { setFecha(event) }}
+                                    value={fechaInc}
+                                    />
+                                </Box>
                             </Grid>
                             <Grid item xs={4}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs} >
-                                    <DemoContainer components={['DatePicker', 'TimePicker']}>
-                                        <TimePicker
-                                        onChange={(event) => { horaIni(event) }}
-                                        sx={EstiloTimePicker}
-                                        label="Hora checada inicio"
-                                        ampm={false}
-                                        viewRenderers={{
-                                            hours: renderTimeViewClock,
-                                            minutes: renderTimeViewClock,
-                                            seconds: renderTimeViewClock,
-                                            }}
-                                        />
-                                    </DemoContainer>
-                                </LocalizationProvider>
+                                <Box sx={{pr:1}}>
+                                    <TextField
+                                    sx={{width: 1}}
+                                    type="time"
+                                    placeholder="Hora checada inicio"
+                                    onChange={(event) => { horaIni(event) }}
+                                    value={horaChecIni}
+                                    />
+                                </Box>
                             </Grid>
                             <Grid item xs={4}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs} >
-                                    <DemoContainer components={['DatePicker', 'TimePicker']}>
-                                        <TimePicker
-                                        onChange={(event) => { horaFin(event) }}
-                                        sx={EstiloTimePicker}
-                                        label="Hora checada fin"
-                                        ampm={false}
-                                        viewRenderers={{
-                                            hours: renderTimeViewClock,
-                                            minutes: renderTimeViewClock,
-                                            seconds: renderTimeViewClock,
-                                            }}
-                                        />
-                                    </DemoContainer>
-                                </LocalizationProvider>
+                                <Box sx={{pr:1}}>
+                                    <TextField
+                                    sx={{width: 1}}
+                                    type="time"
+                                    placeholder="Hora checada fin"
+                                    onChange={(event) => { horaFin(event) }}
+                                    value={horaChecFin}
+                                    />
+                                </Box>
                             </Grid>
                         </Grid>
                     </CardContent>

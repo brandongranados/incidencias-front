@@ -50,11 +50,7 @@ let AgregarDatosFaltan = () => {
         setUsuario(user);
 
         try {
-            let pet = await ajax.post(urlAjax.DATOS_OBLIGATORIOS, { usuario: user },
-                {headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': sessionStorage.getItem("Authorization")
-                  }});
+            let pet = await ajax.post(urlAjax.DATOS_OBLIGATORIOS, { usuario: user });
 
             let datos = await pet.data;
 
@@ -118,11 +114,7 @@ let AgregarDatosFaltan = () => {
         setEspera(true);
 
         try {
-            await ajax.post(urlAjax.ASIGNAR_OBLIGATORIOS, datos, 
-                {headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': sessionStorage.getItem("Authorization")
-                  }});
+            await ajax.post(urlAjax.ASIGNAR_OBLIGATORIOS, datos);
             setEspera(false);
             await alertasComponent.crearModalAlerta({
                 titulo: "Ok",

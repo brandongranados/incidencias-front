@@ -75,10 +75,10 @@ let DocPdf = function({resp}){
                                             <strong>Tarjeta: </strong>
                                             { resp.tarjeta }
                                             <br/>
-                                            <strong>Fecha economico: </strong>
+                                            <strong>Fecha económico: </strong>
                                             { resp.fecha_pertenece }
                                             <br/>
-                                            <strong>Registrada el dia: </strong>
+                                            <strong>Registrada el día: </strong>
                                             { resp.fecha_registro }
                                             <br/>
                                             <strong>Serie memo: </strong>
@@ -109,7 +109,7 @@ let DocPdf = function({resp}){
                                             <strong>Observaciones: </strong>
                                             { resp.observaciones }
                                             <br/>
-                                            <strong>Registrada el dia: </strong>
+                                            <strong>Registrada el día: </strong>
                                             { resp.fecha_registro }
                                             <br/>
                                             <strong>Serie memo: </strong>

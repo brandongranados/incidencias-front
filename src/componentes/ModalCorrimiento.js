@@ -121,11 +121,7 @@ let ModalCorrimiento = ({datos, cerrarModal}) => {
 
             setEspera(true);
 
-            await ajax.post(urlAjax.CORRIMIENTO_ABIERTA_ACTUALIZA, dat, 
-                {headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': sessionStorage.getItem("Authorization")
-                  }});
+            await ajax.post(urlAjax.CORRIMIENTO_ABIERTA_ACTUALIZA, dat);
 
             setEspera(false);
             

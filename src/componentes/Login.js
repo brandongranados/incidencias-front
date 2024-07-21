@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
@@ -7,7 +7,6 @@ import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import InputLabel from '@mui/material/InputLabel';
 import FilledInput from '@mui/material/FilledInput';
@@ -23,6 +22,7 @@ import { setRol, setNombreUsuario, setDatosProf } from "./reducerAutenticacion/U
 
 import ajax from "../ConfigAxios";
 import urlAjax from '../propiedades.json';
+import { Alertas } from "./Alertas";
 
 import '../css/login.css';
 
@@ -30,6 +30,8 @@ let Login = function ()
 {
     const despacha = useDispatch();
     const url = useNavigate();
+
+    const alertasComponent = Alertas();
 
     const [verContra, setVerContra] = useState(false);
     const [usuari, setUsuario] = useState("");
@@ -43,12 +45,10 @@ let Login = function ()
         try{
             let peticion = await ajax.post(urlAjax.LOGIN, {usuario:usuari, contrasena:constrasen});
             let datos = await peticion.data;
-            let token = datos.token;
-            let pet = await ajax.post(urlAjax.DATOS_LOGIN, {usuario:usuari, contrasena:""},
-            {headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer '+token
-              }});
+
+            sessionStorage.setItem("Authorization", "Bearer "+datos.token);
+
+            let pet = await ajax.post(urlAjax.DATOS_LOGIN, {usuario:usuari, contrasena:""});
             let dat = await pet.data;
             let roles = JSON.parse(datos.rol);
 
@@ -75,6 +75,17 @@ let Login = function ()
             }
             
         } catch (error) {
+            await alertasComponent.crearModalAlerta({
+                titulo: "Error",
+                leyenda: "Credenciales erróneas.",
+                icono: 2,
+                activaCancelacion: false,
+                TextoConfirmacion: "Cerrar",
+                textoCancelacion: "",
+                colorCancelar: "",
+                activa: true,
+                colorConfirmar: "#d32f2f"
+            });
             despacha(sinAcceso());
             url("/");
         }
@@ -96,44 +107,47 @@ let Login = function ()
                         <Typography variant="h4" component="span" >
                             Iniciar sesi&oacute;n
                         </Typography>
-                        <form>
-                            <TextField
-                                sx={{width:"100%", marginTop:"2%"}}
-                                label="Usuario"
-                                placeholder="Usuario"
-                                multiline
-                                variant="filled"
+                        <FormControl sx={{width:1}} variant="filled">
+                            <InputLabel htmlFor="filled-adornment-password" 
+                                style={{fontSize:"1.5em"}} >
+                                Usuario
+                            </InputLabel>
+                            <FilledInput
+                                type={'text'}
                                 onChange={cambiarUser}
-                                inputProps={{style:{fontSize:"1.5em", height:"1.5em"}}}
-                                InputLabelProps={{style:{fontSize:"1.5em"}}} />
-                            <FormControl sx={{width:"100%"}} variant="filled">
-                                <InputLabel htmlFor="filled-adornment-password" style={{fontSize:"1.5em"}} >
-                                    Contrasena
-                                </InputLabel>
-                                <FilledInput
-                                    id="filled-adornment-password"
-                                    type={verContra ? 'text' : 'password'}
-                                    onChange={cambiarContra}
-                                    style={{fontSize:"1.5em"}}
-                                    endAdornment={
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                        aria-label="toggle password visibility"
-                                        onMouseDown={cambioVisulizacionContra}
-                                        onMouseUp={cambioVisulizacionContra}
-                                        edge="end"
-                                        >
-                                        {verContra ? <VisibilityOff /> : <Visibility />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                    }
-                                />
-                            </FormControl>
-                        </form>
+                                style={{fontSize:"1.5em"}}
+                            />
+                        </FormControl>
+                        <FormControl sx={{width:1, mt:1}} variant="filled">
+                            <InputLabel htmlFor="filled-adornment-password" 
+                                style={{fontSize:"1.5em"}} >
+                                Contraseña
+                            </InputLabel>
+                            <FilledInput
+                                id="filled-adornment-password"
+                                type={verContra ? 'text' : 'password'}
+                                onChange={cambiarContra}
+                                style={{fontSize:"1.5em"}}
+                                endAdornment={
+                                <InputAdornment position="end">
+                                    <IconButton
+                                    aria-label="toggle password visibility"
+                                    onMouseDown={cambioVisulizacionContra}
+                                    onMouseUp={cambioVisulizacionContra}
+                                    edge="end"
+                                    >
+                                    {verContra ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                                }
+                            />
+                        </FormControl>
                     </CardContent>
                     <CardActions sx={{justifyContent:"center"}}>
-                        <Button variant="contained" color="success" sx={{width:"15%", fontSize:"1.5em"}} onClick={ajaxInicio}>
-                            Entrar
+                        <Button variant="contained" color="success" sx={{width:1/6}} onClick={ajaxInicio}>
+                            <Typography fontSize={20}>
+                                Entrar
+                            </Typography>
                         </Button>
                     </CardActions>
                 </Card>

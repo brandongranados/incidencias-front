@@ -1,13 +1,5 @@
 import { useEffect, useState } from "react";
 
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
-import 'dayjs/locale/en-gb';
-
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Grid";
@@ -24,8 +16,6 @@ import Cargando from "./Cargando";
 import { Alertas } from "./Alertas";
 
 import '../css/sidebar.css';
-import dayjs from "dayjs";
-
 /**
  * DATOS DE INCIDENCIA 1
  * DATOS DE COMPENSACION 2
@@ -39,9 +29,6 @@ let ModalReposicion = ({datos, cerrarModal}) => {
         borderColor: "black",
         marginTop: "0.7%",
         marginLeft: "0.7%",
-    };
-    const EstiloTimePicker = {
-        width: '98%!important',
     };
     //CREAR COMPONENTE DE ALERTAS
     const alertasComponent = Alertas();
@@ -91,12 +78,6 @@ let ModalReposicion = ({datos, cerrarModal}) => {
         setValorObserv(menos+numero);
     };
     let setFecha = (e, index) => {
-        let ano = (e["$d"].getFullYear())+"";
-        let mes = (e["$d"].getMonth()+1)+"";
-        let dia = (e["$d"].getDate())+"";
-
-        mes = mes.length <= 1 ? "0"+mes : mes;
-        dia = dia.length <= 1 ? "0"+dia : dia;
 
         if( index != null )
         {
@@ -104,19 +85,12 @@ let ModalReposicion = ({datos, cerrarModal}) => {
             let izq = fechaCom.filter( (iterador) => iterador.index < index );
             let der = fechaCom.filter( (iterador) => iterador.index > index );
 
-            setFechaCom([ ...izq, { index:busq.index, fecha: ano+"-"+mes+"-"+dia, bool:true }, ...der ]);
+            setFechaCom([ ...izq, { index:busq.index, fecha: e.target.value.length == 0 ? null: e.target.value, bool:true }, ...der ]);
         }
         else
-            setFechaInc(ano+"-"+mes+"-"+dia);
+            setFechaInc(e.target.value.length == 0 ? null: e.target.value);
     };
     let setHoraInicio = (e, index) => {
-        let hora = (e["$d"].getHours())+"";
-        let min = (e["$d"].getMinutes())+"";
-        let seg = (e["$d"].getSeconds())+"";
-
-        hora = hora.length <= 1 ? "0"+hora : hora;
-        min = min.length <= 1 ? "0"+min : min;
-        seg = seg.length <= 1 ? "0"+seg : seg;
 
         if( index != null )
         {
@@ -124,19 +98,12 @@ let ModalReposicion = ({datos, cerrarModal}) => {
             let izq = horaChecIniCom.filter( (iterador) => iterador.index < index );
             let der = horaChecIniCom.filter( (iterador) => iterador.index > index );
 
-            setHoraChecIniCom([ ...izq, { index:busq.index, horaIni: hora+":"+min+":"+seg, bool:true }, ...der ]);
+            setHoraChecIniCom([ ...izq, { index:busq.index, horaIni: e.target.value.length == 0 ? null: e.target.value, bool:true }, ...der ]);
         }
         else
-            setHoraChecIni(hora+":"+min+":"+seg);
+            setHoraChecIni(e.target.value.length == 0 ? null: e.target.value);
     };
     let setHoraFinal = (e, index) => {
-        let hora = (e["$d"].getHours())+"";
-        let min = (e["$d"].getMinutes())+"";
-        let seg = (e["$d"].getSeconds())+"";
-
-        hora = hora.length <= 1 ? "0"+hora : hora;
-        min = min.length <= 1 ? "0"+min : min;
-        seg = seg.length <= 1 ? "0"+seg : seg;
 
         if( index != null )
         {
@@ -144,10 +111,10 @@ let ModalReposicion = ({datos, cerrarModal}) => {
             let izq = horaChecFinCom.filter( (iterador) => iterador.index < index );
             let der = horaChecFinCom.filter( (iterador) => iterador.index > index );
 
-            setHoraChecFinCom([ ...izq, { index:busq.index, horaFin: hora+":"+min+":"+seg, bool:true }, ...der ]);
+            setHoraChecFinCom([ ...izq, { index:busq.index, horaFin: e.target.value.length == 0 ? null: e.target.value, bool:true }, ...der ]);
         }
         else
-            setHoraChecFin(hora+":"+min+":"+seg);
+            setHoraChecFin(e.target.value.length == 0 ? null: e.target.value);
     };
     let tratameintoError = async (respuesta) => {
         await alertasComponent.crearModalAlerta({
@@ -228,18 +195,14 @@ let ModalReposicion = ({datos, cerrarModal}) => {
             }
             setEspera(true);
 
-            await ajax.post(urlAjax.REPOSICION_ABIERTA_ACTUALIZA, data, 
-                {headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': sessionStorage.getItem("Authorization")
-                  }});
+            await ajax.post(urlAjax.REPOSICION_ABIERTA_ACTUALIZA, data);
 
             setEspera(false);
             
             await alertasComponent.crearModalAlerta({
                 titulo: "Ok",
                 leyenda: "Incidencia actualizada.",
-                icono: 2,
+                icono: 1,
                 activaCancelacion: false,
                 TextoConfirmacion: "Cerrar",
                 textoCancelacion: "",
@@ -263,11 +226,7 @@ let ModalReposicion = ({datos, cerrarModal}) => {
 
             setEspera(true);
 
-            let res = await ajax.post(urlAjax.VISULIZAR_MEMOS_INC_COMP, datos, 
-                {headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': sessionStorage.getItem("Authorization")
-                  }});
+            let res = await ajax.post(urlAjax.VISULIZAR_MEMOS_INC_COMP, datos);
 
             data = await res.data;
 
@@ -332,61 +291,48 @@ let ModalReposicion = ({datos, cerrarModal}) => {
                         </Typography>
                             <Grid container>
                                 <Grid item xs={3}>
-                                    <LocalizationProvider 
-                                    dateAdapter={AdapterDayjs} 
-                                    adapterLocale="en-gb" >
-                                        <DemoContainer components={['DatePicker', 'TimePicker']}>
-                                            <DatePicker sx={EstiloTimePicker} label="Fecha incidencia" 
-                                                onChange={(event) => setFecha(event, null)}
-                                                value={dayjs(fechaInc)} />
-                                        </DemoContainer>
-                                    </LocalizationProvider>
+                                    <Box sx={{pr:1}}>
+                                        <TextField
+                                        sx={{width: 1}}
+                                        type="date"
+                                        placeholder="Fecha incidencia"
+                                        onChange={(event) => setFecha(event, null)}
+                                        value={fechaInc}
+                                        />
+                                    </Box>
                                 </Grid>
                                 <Grid item xs={3}>
-                                    <LocalizationProvider dateAdapter={AdapterDayjs} >
-                                        <DemoContainer components={['DatePicker', 'TimePicker']}>
-                                            <TimePicker
-                                            onChange={(event) => setHoraInicio(event, null)}
-                                            sx={EstiloTimePicker}
-                                            label="Hora checada inicio" 
-                                            ampm={false}
-                                            value={dayjs("1970-01-01T"+horaChecIni)}
-                                            viewRenderers={{
-                                                hours: renderTimeViewClock,
-                                                minutes: renderTimeViewClock,
-                                                seconds: renderTimeViewClock,
-                                                }}
-                                            />
-                                        </DemoContainer>
-                                    </LocalizationProvider>
+                                    <Box sx={{pr:1}}>
+                                        <TextField
+                                        sx={{width: 1}}
+                                        type="time"
+                                        placeholder="Hora checada inicio"
+                                        onChange={(event) => setHoraInicio(event, null)}
+                                        value={horaChecIni}
+                                        />
+                                    </Box>
                                 </Grid>
                                 <Grid item xs={3}>
-                                    <LocalizationProvider dateAdapter={AdapterDayjs} >
-                                        <DemoContainer components={['DatePicker', 'TimePicker']}>
-                                            <TimePicker
-                                            onChange={(event) => setHoraFinal(event, null)}
-                                            sx={EstiloTimePicker}
-                                            label="Hora checada fin"
-                                            ampm={false}
-                                            value={dayjs("1970-01-01T"+horaChecFin)}
-                                            viewRenderers={{
-                                                hours: renderTimeViewClock,
-                                                minutes: renderTimeViewClock,
-                                                seconds: renderTimeViewClock,
-                                                }}
-                                            />
-                                        </DemoContainer>
-                                    </LocalizationProvider>
+                                    <Box sx={{pr:1}}>
+                                        <TextField
+                                        sx={{width: 1}}
+                                        type="time"
+                                        placeholder="Hora checada fin"
+                                        onChange={(event) => setHoraFinal(event, null)}
+                                        value={horaChecFin}
+                                        />
+                                    </Box>
                                 </Grid>
                                 <Grid item xs={3}>
-                                    <TextField
-                                    onChange={setObservaciones}
-                                    className='elemetsFormulario'
-                                    multiline
-                                    variant="filled"
-                                    label="Observaciones"
-                                    placeholder="Observaciones"
-                                    value={valorObserv} />
+                                    <Box sx={{pr:1}}>
+                                        <TextField
+                                        onChange={setObservaciones}
+                                        sx={{width:1}}
+                                        variant="filled"
+                                        label="Observaciones"
+                                        placeholder="Observaciones"
+                                        value={valorObserv} />
+                                    </Box>
                                 </Grid>
                             </Grid>
                     </CardContent>
@@ -414,60 +360,46 @@ let ModalReposicion = ({datos, cerrarModal}) => {
                                 compesarDin.map( (iterador) => (
                                     <Grid container index={iterador.index}>
                                         <Grid item xs={3}>
-                                            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb" >
-                                                <DemoContainer components={['DatePicker', 'TimePicker']}>
-                                                    <DatePicker 
-                                                        sx={EstiloTimePicker} 
-                                                        label="Fecha incidencia"
-                                                        onChange={(event) => setFecha(event, iterador.index)}
-                                                        value={dayjs(fechaCom[iterador.index].fecha)} />
-                                                </DemoContainer>
-                                            </LocalizationProvider>
+                                            <Box sx={{pr:1, pt:1}}>
+                                                <TextField
+                                                sx={{width: 1}}
+                                                type="date"
+                                                placeholder="Fecha incidencia"
+                                                onChange={(event) => setFecha(event, iterador.index)}
+                                                value={fechaCom[iterador.index].fecha}
+                                                />
+                                            </Box>
                                         </Grid>
                                         <Grid item xs={3}>
-                                            <LocalizationProvider dateAdapter={AdapterDayjs} >
-                                                <DemoContainer components={['DatePicker', 'TimePicker']}>
-                                                    <TimePicker
-                                                    onChange={(event) => setHoraInicio(event, iterador.index)}
-                                                    sx={EstiloTimePicker}
-                                                    label="Hora checada inicio"
-                                                    ampm={false}
-                                                    viewRenderers={{
-                                                        hours: renderTimeViewClock,
-                                                        minutes: renderTimeViewClock,
-                                                        seconds: renderTimeViewClock,
-                                                        }}
-                                                    value={dayjs("1970-01-01T"+horaChecIniCom[iterador.index].horaIni)}
-                                                    />
-                                                </DemoContainer>
-                                            </LocalizationProvider>
+                                            <Box sx={{pr:1, pt:1}}>
+                                                <TextField
+                                                sx={{width: 1}}
+                                                type="time"
+                                                placeholder="Hora checada inicio"
+                                                onChange={(event) => setHoraInicio(event, iterador.index)}
+                                                value={horaChecIniCom[iterador.index].horaIni}
+                                                />
+                                            </Box>
                                         </Grid>
                                         <Grid item xs={3}>
-                                            <LocalizationProvider dateAdapter={AdapterDayjs} >
-                                                <DemoContainer components={['DatePicker', 'TimePicker']}>
-                                                    <TimePicker
-                                                    onChange={(event) => setHoraFinal(event, iterador.index)}
-                                                    sx={EstiloTimePicker}
-                                                    label="Hora checada fin"
-                                                    ampm={false}
-                                                    viewRenderers={{
-                                                        hours: renderTimeViewClock,
-                                                        minutes: renderTimeViewClock,
-                                                        seconds: renderTimeViewClock,
-                                                        }}
-                                                        value={dayjs("1970-01-01T"+horaChecFinCom[iterador.index].horaFin)}
-                                                    />
-                                                </DemoContainer>
-                                            </LocalizationProvider>
+                                            <Box sx={{pr:1, pt:1}}>
+                                                <TextField
+                                                sx={{width: 1}}
+                                                type="time"
+                                                placeholder="Hora checada fin"
+                                                onChange={(event) => setHoraFinal(event, iterador.index)}
+                                                value={horaChecFinCom[iterador.index].horaFin}
+                                                />
+                                            </Box>
                                         </Grid>
                                         <Grid item xs={3}>
-                                            <TextField
-                                            onChange={ (event) => setHorasCubre(event, iterador.index) }
-                                            className='elemetsFormulario'
-                                            multiline
-                                            variant="filled"
-                                            label="Horas cubre"
-                                            value={horaCubre[iterador.index].numero} />
+                                            <Box sx={{pr:1, pt:1}}>
+                                                <TextField
+                                                onChange={ (event) => setHorasCubre(event, iterador.index) }
+                                                variant="filled"
+                                                label="Horas cubre"
+                                                value={horaCubre[iterador.index].numero} />
+                                            </Box>
                                         </Grid>
                                     </Grid>
                                 ) )
