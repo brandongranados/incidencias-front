@@ -23,9 +23,6 @@ let DatosProfesor = function(){
     const alertasComponent = Alertas();
 
     //CARGA DE ARCHIVOS
-    const [archBase64, setArchBase64] = useState("");
-    const [tipoArchivo, setTipoArchivo] = useState("");
-    const [nomArch, setNomArch] = useState("");
     const [archSel, setArchSel] = useState();
 
     //VARIABLE MENAJO DE MODAL CARGANDO
@@ -39,34 +36,16 @@ let DatosProfesor = function(){
               let cadenaArray = resultado.split(",");
               let type = archivo.name;
               let tipo = type.split(".");
-              resolve({ archBase64: cadenaArray[1], tipoArchivo: tipo[1], nombre: archivo.name });
+              resolve({ archBase64: cadenaArray[1], tipoArchivo: tipo[1], nombre: archivo.name, bool: true });
             };
             leer.onerror = (e) => {
-              reject(new Error("Error al leer el archivo."));
+              reject({ bool: false });
             };
             leer.readAsDataURL(archivo);
           });
     };
 
     let cambiarRuta = async (e) => setArchSel(e.target.files[0]);
-
-    let esperaCargaExcel = async () => {
-
-        let retorno = false;
-
-        if( archSel )
-            try {
-                let { archBase64, tipoArchivo, nombre } = await leerArchivo(archSel);
-                setArchBase64(archBase64);
-                setTipoArchivo(tipoArchivo);
-                setNomArch(nombre);
-                retorno = true;
-            } catch (error){
-                retorno = false;
-            }
-        
-        return retorno;
-    };
 
     let solicitarAjax = async (e) => {
 
@@ -81,6 +60,7 @@ let DatosProfesor = function(){
             activa: true,
             colorConfirmar: "#2e7d32"
         });
+
         if( !alertaModal )
         {
             e.preventDefault();
@@ -100,7 +80,9 @@ let DatosProfesor = function(){
 
         setEspera(true);
 
-        if( !( await esperaCargaExcel() ) )
+        let excel = await leerArchivo(archSel);
+
+        if( !excel.bool )
         {
             e.preventDefault();
             setEspera(false);
@@ -122,9 +104,9 @@ let DatosProfesor = function(){
 
             let datos = 
             { 
-                archivo: archBase64, 
-                tipo: tipoArchivo, 
-                nombre: nomArch 
+                archivo: excel.archBase64, 
+                tipo: excel.tipoArchivo, 
+                nombre: excel.nombre 
             };
 
             await ajax.post(urlAjax.EXCEL_PROF, datos);
